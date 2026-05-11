@@ -1,0 +1,1562 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ميزان — منظومة الحارس الذكي لنزاهة بيانات حساب المواطن</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --g:#0ecf9e;--g2:#0aad83;--gb:#0ecf9e;--gl:rgba(14,207,158,.12);--gm:rgba(14,207,158,.22);
+  --b:#4f9ff8;--bl:rgba(79,159,248,.12);--bm:rgba(79,159,248,.22);
+  --r:#f25c5c;--rl:rgba(242,92,92,.12);--o:#f59c3c;--ol:rgba(245,156,60,.12);
+  --bg:#080d18;--w:#111827;--s1:#0e1628;--s2:#121e30;
+  --bd:rgba(255,255,255,.07);--bd2:rgba(255,255,255,.14);
+  --t:#dde4f0;--t2:#8fa3bf;--t3:#546a85;--t4:#3a4f66;
+  --sh:0 1px 4px rgba(0,0,0,.5);
+  --shm:0 4px 20px rgba(0,0,0,.6);
+  --shl:0 12px 48px rgba(0,0,0,.7);
+}
+html{scroll-behavior:smooth;}
+body{font-family:'Tajawal',sans-serif;background:var(--bg);color:var(--t);direction:rtl;overflow-x:hidden;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--bg);}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:3px;}
+
+/* NAV */
+nav{position:fixed;top:0;inset-inline:0;z-index:900;height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 48px;background:rgba(8,13,24,.9);backdrop-filter:blur(24px);border-bottom:1px solid var(--bd);}
+.nlogo{display:flex;align-items:center;gap:11px;cursor:pointer;}
+.nmark{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--g),var(--b));display:flex;align-items:center;justify-content:center;font-size:1.1rem;box-shadow:0 0 16px rgba(14,207,158,.3);}
+.ntext{font-size:1.2rem;font-weight:900;color:#fff;letter-spacing:-.02em;}
+.nsub{font-size:.58rem;color:var(--t3);font-weight:500;margin-top:-2px;}
+.ntabs{display:flex;gap:2px;}
+.ntab{background:none;border:none;color:var(--t3);font-family:'Tajawal',sans-serif;font-size:.85rem;font-weight:600;padding:7px 18px;border-radius:8px;cursor:pointer;transition:all .18s;}
+.ntab:hover{background:rgba(255,255,255,.06);color:var(--t);}
+.ntab.on{background:rgba(14,207,158,.15);color:var(--g);font-weight:700;}
+.ncta{background:linear-gradient(135deg,var(--g),var(--g2));color:#fff;border:none;padding:9px 22px;border-radius:9px;font-family:'Tajawal',sans-serif;font-size:.88rem;font-weight:700;cursor:pointer;transition:all .2s;box-shadow:0 2px 8px rgba(14,207,158,.25);}
+.ncta:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(14,207,158,.35);}
+
+/* VIEWS */
+.view{display:none;}.view.on{display:block;}
+
+/* ══ HOME ══ */
+#v-home{padding-top:64px;}
+
+.hero{background:linear-gradient(155deg,#050c18 0%,#081120 50%,#050c18 100%);padding:72px 48px 60px;position:relative;overflow:hidden;border-bottom:1px solid var(--bd);}
+.hero-mesh{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 75% 15%,rgba(14,207,158,.08),transparent 55%),radial-gradient(ellipse at 20% 75%,rgba(79,159,248,.06),transparent 55%);}
+.hero-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 420px;gap:56px;align-items:center;}
+.heyebrow{display:inline-flex;align-items:center;gap:8px;background:rgba(14,207,158,.08);border:1px solid rgba(14,207,158,.2);color:var(--g);font-size:.7rem;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;padding:6px 16px;border-radius:30px;margin-bottom:22px;box-shadow:0 2px 8px rgba(10,143,110,.1);}
+.ep{width:7px;height:7px;border-radius:50%;background:var(--gb);animation:ep 2.5s ease-in-out infinite;}
+@keyframes ep{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.3;transform:scale(.6);}}
+.hero h1{font-size:clamp(2.2rem,3.8vw,3.4rem);font-weight:900;line-height:1.1;color:#fff;letter-spacing:-.03em;margin-bottom:14px;}
+.hero h1 em{font-style:normal;background:linear-gradient(120deg,var(--g),var(--b));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hero-desc{font-size:1rem;color:var(--t3);line-height:1.85;margin-bottom:30px;max-width:520px;}
+.hero-desc strong{color:var(--t2);}
+.hbtns{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:40px;}
+.btn-p{background:linear-gradient(135deg,var(--g),var(--g2));color:#fff;border:none;padding:13px 28px;border-radius:10px;font-family:'Tajawal',sans-serif;font-size:.95rem;font-weight:700;cursor:pointer;transition:all .2s;box-shadow:0 3px 12px rgba(14,207,158,.25);display:flex;align-items:center;gap:8px;}
+.btn-p:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(14,207,158,.35);}
+.btn-s{background:rgba(255,255,255,.06);color:var(--t);border:1px solid var(--bd);padding:13px 28px;border-radius:10px;font-family:'Tajawal',sans-serif;font-size:.95rem;font-weight:600;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:8px;}
+.btn-s:hover{background:rgba(255,255,255,.1);border-color:rgba(14,207,158,.4);color:var(--g);}
+
+/* LIVE COUNTER */
+.live-box{background:var(--w);border:1px solid var(--bd);border-radius:16px;padding:20px 22px;box-shadow:var(--shm);}
+.lb-head{display:flex;align-items:center;gap:8px;margin-bottom:14px;}
+.live-chip{display:flex;align-items:center;gap:5px;background:rgba(242,92,92,.1);color:var(--r);font-size:.62rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;padding:3px 10px;border-radius:20px;border:1px solid rgba(220,38,38,.2);}
+.live-chip-dot{width:6px;height:6px;border-radius:50%;background:var(--r);animation:ep 1.2s infinite;}
+.lb-title{font-size:.82rem;font-weight:700;color:var(--t2);}
+.lb-main{text-align:center;padding:8px 0 12px;}
+.lb-num{font-size:2.6rem;font-weight:900;letter-spacing:-.04em;background:linear-gradient(135deg,var(--g),var(--b));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.lb-lbl{font-size:.76rem;color:var(--t3);margin-top:4px;}
+.lb-div{height:1px;background:var(--bd);margin:12px 0;}
+.lb-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.lb-stat{background:rgba(255,255,255,.04);border:1px solid var(--bd);border-radius:10px;padding:12px;text-align:center;}
+.lb-snum{font-size:1.4rem;font-weight:900;color:#fff;letter-spacing:-.02em;}
+.lb-slbl{font-size:.68rem;color:var(--t3);margin-top:2px;}
+.lb-note{font-size:.67rem;color:var(--t4);text-align:center;margin-top:10px;}
+
+/* STRIP */
+.strip{background:var(--w);border-top:1px solid var(--bd);padding:26px 48px;}
+.strip-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);}
+.ss{padding:0 20px;border-left:1px solid var(--bd);text-align:center;}
+.ss:last-child{border-left:none;}
+.ssn{font-size:1.9rem;font-weight:900;letter-spacing:-.03em;background:linear-gradient(135deg,var(--g),var(--b));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.ssl{font-size:.72rem;color:var(--t3);margin-top:3px;font-weight:500;}
+
+/* SECTIONS */
+.sec{padding:68px 48px;}
+.si{max-width:1100px;margin:0 auto;}
+.sh{margin-bottom:44px;}
+.sh.c{text-align:center;}.sh.c .sd{margin:0 auto;}
+.kk{display:inline-flex;align-items:center;gap:6px;font-size:.67rem;font-weight:800;letter-spacing:3px;text-transform:uppercase;padding:5px 14px;border-radius:20px;margin-bottom:12px;}
+.kg{background:rgba(14,207,158,.1);color:var(--g);border:1px solid rgba(14,207,158,.2);}
+.kb{background:rgba(79,159,248,.1);color:var(--b);border:1px solid rgba(79,159,248,.2);}
+.ko{background:rgba(245,156,60,.1);color:var(--o);border:1px solid rgba(245,156,60,.2);}
+.st{font-size:clamp(1.6rem,3vw,2.2rem);font-weight:900;color:#fff;letter-spacing:-.02em;margin-bottom:10px;}
+.sd{color:var(--t3);font-size:.94rem;line-height:1.8;max-width:580px;}
+
+/* PROBLEM */
+.prob-sec{background:var(--s1);border-top:1px solid var(--bd);border-bottom:1px solid var(--bd);}
+.prob-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start;}
+.prob-text p{color:var(--t2);font-size:.94rem;line-height:1.85;margin-bottom:16px;}
+.prob-text strong{color:var(--t);}
+.prob-cards{display:flex;flex-direction:column;gap:12px;}
+.pcard{background:rgba(255,255,255,.03);border:1px solid var(--bd);border-radius:14px;padding:18px 20px;display:flex;gap:14px;transition:all .2s;}
+.pcard:hover{border-color:var(--g);box-shadow:0 0 20px rgba(14,207,158,.1);transform:translateX(-4px);}
+.pci{width:44px;height:44px;min-width:44px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;}
+.pr{background:rgba(242,92,92,.1);border:1px solid rgba(242,92,92,.2);}
+.po{background:rgba(245,156,60,.1);border:1px solid rgba(245,156,60,.2);}
+.pb{background:rgba(79,159,248,.1);border:1px solid rgba(79,159,248,.2);}
+.pch4{font-size:.9rem;font-weight:700;color:#fff;margin-bottom:4px;}
+.pcp{font-size:.79rem;color:var(--t3);line-height:1.65;}
+
+/* CASES */
+.cases-sec{background:var(--s1);border-top:1px solid var(--bd);border-bottom:1px solid var(--bd);}
+.cases-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:44px;}
+.ccase{background:var(--s1);border:1px solid var(--bd);border-radius:16px;overflow:hidden;box-shadow:var(--sh);transition:all .25s;}
+.ccase:hover{box-shadow:var(--shl);transform:translateY(-4px);}
+.cc-head{padding:18px 20px 14px;border-bottom:1px solid var(--bd);}
+.cc-id{font-size:.64rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--t4);margin-bottom:6px;}
+.cc-title{font-size:.95rem;font-weight:800;color:#fff;}
+.cc-body{padding:14px 20px;}
+.cc-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--bd);}
+.cc-row:last-child{border-bottom:none;}
+.crl{font-size:.75rem;color:var(--t3);}
+.crv{font-size:.8rem;font-weight:700;color:var(--t);}
+.crv.red{color:var(--r);}
+.crv.orange{color:var(--o);}
+.crv.green{color:var(--g2);}
+.cc-foot{padding:14px 20px;background:rgba(255,255,255,.02);border-top:1px solid var(--bd);}
+.cc-verdict{display:flex;align-items:center;gap:8px;font-size:.8rem;font-weight:700;margin-bottom:8px;}
+.vd{color:var(--r);}.vw{color:var(--o);}.vok{color:var(--g2);}
+.vbadge{display:inline-block;font-size:.7rem;padding:3px 10px;border-radius:20px;font-weight:700;}
+.vbd{background:rgba(242,92,92,.12);color:var(--r);border:1px solid rgba(242,92,92,.25);}
+.vbw{background:rgba(245,156,60,.12);color:var(--o);border:1px solid rgba(245,156,60,.25);}
+.vbok{background:rgba(14,207,158,.12);color:var(--g);border:1px solid rgba(14,207,158,.25);}
+.csbar{height:5px;border-radius:3px;}
+.csd{background:linear-gradient(90deg,rgba(242,92,92,.3),var(--r));}
+.csw{background:linear-gradient(90deg,rgba(245,156,60,.3),var(--o));}
+.csok{background:linear-gradient(90deg,var(--gm),var(--g));}
+
+/* LAYERS */
+.layers-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+.layer{background:var(--s1);border:1px solid var(--bd);border-radius:18px;padding:30px 26px;box-shadow:var(--sh);transition:all .25s;position:relative;overflow:hidden;}
+.layer::before{content:'';position:absolute;top:0;right:0;width:80px;height:80px;border-radius:50%;transform:translate(20px,-20px);opacity:.08;}
+.l1::before{background:var(--g);}.l2::before{background:var(--b);}.l3::before{background:var(--o);}
+.layer:hover{box-shadow:var(--shl);transform:translateY(-5px);}
+.ln{font-size:.62rem;font-weight:800;letter-spacing:3px;text-transform:uppercase;margin-bottom:18px;}
+.l1 .ln{color:var(--g);}.l2 .ln{color:var(--b);}.l3 .ln{color:var(--o);}
+.li{font-size:2rem;margin-bottom:12px;display:block;}
+.lname{font-size:1.05rem;font-weight:800;color:#fff;margin-bottom:8px;}
+.ldesc{font-size:.82rem;color:var(--t3);line-height:1.75;}
+.ltech{display:inline-block;margin-top:14px;font-size:.64rem;font-weight:700;padding:4px 12px;border-radius:20px;letter-spacing:1px;}
+.l1 .ltech{background:rgba(14,207,158,.1);color:var(--g);border:1px solid rgba(14,207,158,.2);}
+.l2 .ltech{background:rgba(79,159,248,.1);color:var(--b);border:1px solid rgba(79,159,248,.2);}
+.l3 .ltech{background:rgba(245,156,60,.1);color:var(--o);border:1px solid rgba(245,156,60,.2);}
+
+/* CHARTS */
+.charts-sec{background:var(--s1);border-top:1px solid var(--bd);border-bottom:1px solid var(--bd);}
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:44px;}
+.cchart{background:rgba(255,255,255,.03);border:1px solid var(--bd);border-radius:16px;padding:22px;box-shadow:var(--sh);}
+.ct{font-size:.76rem;font-weight:800;color:var(--t2);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:16px;}
+.cw{position:relative;height:200px;}
+
+/* IMPACT */
+.impact-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:44px;}
+.icard{background:var(--s1);border:1px solid var(--bd);border-radius:16px;padding:24px 20px;text-align:center;box-shadow:var(--sh);transition:all .2s;}
+.icard:hover{box-shadow:var(--shm);transform:translateY(-3px);}
+.icico{font-size:1.8rem;margin-bottom:10px;display:block;}
+.icnum{font-size:2rem;font-weight:900;letter-spacing:-.03em;background:linear-gradient(135deg,var(--g),var(--b));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px;}
+.iclbl{font-size:.88rem;font-weight:700;color:#fff;margin-bottom:6px;}
+.icdesc{font-size:.76rem;color:var(--t3);line-height:1.6;}
+
+/* ARCH */
+.arch-flow{display:flex;align-items:center;justify-content:center;gap:0;flex-wrap:wrap;margin-top:44px;}
+.anode{background:var(--s1);border:1px solid var(--bd);border-radius:14px;padding:18px 20px;text-align:center;min-width:140px;box-shadow:var(--sh);transition:all .2s;}
+.anode:hover{box-shadow:var(--shm);transform:translateY(-3px);}
+.anico{font-size:1.6rem;margin-bottom:6px;display:block;}
+.anname{font-size:.82rem;font-weight:700;color:#fff;}
+.antech{font-size:.68rem;color:var(--t3);margin-top:2px;}
+.aarr{padding:0 6px;color:var(--t4);font-size:1.2rem;}
+.tpills{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:26px;}
+.tp{font-size:.75rem;font-weight:600;padding:7px 16px;border-radius:30px;background:var(--s2);border:1px solid var(--bd);color:var(--t2);transition:all .18s;cursor:default;}
+.tp:hover{background:rgba(14,207,158,.1);border-color:rgba(14,207,158,.25);color:var(--g);}
+
+/* CTA */
+.cta-wrap{padding:68px 48px;background:var(--bg);}
+.ctabox{background:linear-gradient(135deg,rgba(14,207,158,.06),rgba(79,159,248,.05));border:1px solid rgba(14,207,158,.15);border-radius:20px;padding:52px 48px;text-align:center;box-shadow:var(--shm);position:relative;overflow:hidden;max-width:680px;margin:0 auto;}
+.ctabox::before{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;background:radial-gradient(circle,rgba(10,143,110,.08),transparent 70%);pointer-events:none;}
+.ctabox h2{font-size:1.9rem;font-weight:900;color:#fff;margin-bottom:12px;letter-spacing:-.02em;}
+.ctabox p{color:var(--t3);font-size:.94rem;line-height:1.75;margin-bottom:26px;}
+
+footer{background:rgba(0,0,0,.3);border-top:1px solid var(--bd);padding:26px 48px;display:flex;align-items:center;justify-content:space-between;font-size:.8rem;color:var(--t3);}
+footer strong{color:var(--g);}
+
+/* ══ APP ══ */
+#v-app{padding-top:64px;min-height:100vh;}
+.app-wrap{display:grid;grid-template-columns:360px 1fr;min-height:calc(100vh - 64px);}
+
+.sidebar{background:var(--w);border-left:1px solid var(--bd);padding:22px 20px;overflow-y:auto;max-height:calc(100vh - 64px);position:sticky;top:64px;}
+.sblbl{font-size:.67rem;font-weight:800;color:var(--t3);letter-spacing:3px;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.sblbl::after{content:'';flex:1;height:1px;background:var(--bd);}
+.sbsec{margin-bottom:20px;}
+.fld{margin-bottom:9px;}
+.fld label{display:block;font-size:.71rem;font-weight:700;color:var(--t2);margin-bottom:5px;}
+.fld input,.fld select{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--bd);color:var(--t);padding:9px 12px;border-radius:9px;font-family:'Tajawal',sans-serif;font-size:.88rem;outline:none;transition:all .2s;-webkit-appearance:none;}
+.fld input:focus,.fld select:focus{border-color:var(--g);box-shadow:0 0 0 3px rgba(14,207,158,.1);}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.presets{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:4px;}
+.preset{background:rgba(255,255,255,.04);border:1px solid var(--bd);border-radius:7px;font-family:'Tajawal',sans-serif;font-size:.72rem;font-weight:600;color:var(--t2);padding:7px 4px;cursor:pointer;transition:all .18s;text-align:center;}
+.preset:hover{background:rgba(14,207,158,.1);border-color:rgba(14,207,158,.25);color:var(--g);}
+.mbtn{width:100%;padding:13px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--g),var(--g2));color:#fff;font-family:'Tajawal',sans-serif;font-size:.97rem;font-weight:800;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 3px 12px rgba(14,207,158,.25);margin-top:4px;}
+.mbtn:hover{transform:translateY(-1px);box-shadow:0 5px 16px rgba(14,207,158,.35);}
+.mbtn:disabled{opacity:.6;cursor:not-allowed;transform:none;}
+.ainote{display:flex;align-items:center;justify-content:center;gap:6px;font-size:.67rem;color:var(--t3);margin-top:8px;}
+.aidot{width:6px;height:6px;border-radius:50%;background:var(--gb);animation:ep 2s infinite;}
+
+.rp{padding:26px 30px;overflow-y:auto;max-height:calc(100vh - 64px);background:var(--bg2, #0b1120);}
+.rptop{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.rptitle{font-size:.68rem;font-weight:800;color:var(--t3);letter-spacing:3px;text-transform:uppercase;}
+.chip{display:flex;align-items:center;gap:6px;font-size:.75rem;font-weight:700;padding:5px 14px;border-radius:20px;}
+.cidl{background:rgba(255,255,255,.05);color:var(--t3);border:1px solid var(--bd);}
+.cok{background:rgba(14,207,158,.12);color:var(--g);border:1px solid rgba(14,207,158,.25);}
+.cwn{background:rgba(245,156,60,.12);color:var(--o);border:1px solid rgba(245,156,60,.25);}
+.cdng{background:rgba(242,92,92,.12);color:var(--r);border:1px solid rgba(242,92,92,.25);}
+.cdot{width:6px;height:6px;border-radius:50%;}
+
+.score-hero{background:var(--w);border:1px solid var(--bd);border-radius:18px;padding:22px;margin-bottom:16px;box-shadow:var(--sh);display:grid;grid-template-columns:auto 1fr;gap:22px;align-items:center;}
+svg.ring{width:108px;height:108px;}
+.ring-bg{fill:none;stroke:rgba(255,255,255,.06);stroke-width:9;}
+.ring-fg{fill:none;stroke-width:9;stroke-linecap:round;stroke-dasharray:251.2;stroke-dashoffset:251.2;transform:rotate(-90deg);transform-origin:50% 50%;transition:stroke-dashoffset .9s cubic-bezier(.4,0,.2,1),stroke .4s;}
+.rlbl{font-size:.65rem;color:var(--t3);text-align:center;margin-top:4px;}
+.sr h3{font-size:1.05rem;font-weight:800;color:#fff;margin-bottom:6px;}
+.sr p{font-size:.83rem;color:var(--t3);line-height:1.7;margin-bottom:12px;}
+.sbt{height:8px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden;}
+.sbf{height:100%;border-radius:4px;transition:width .9s cubic-bezier(.4,0,.2,1),background .4s;}
+.ssub{font-size:.71rem;color:var(--t3);margin-top:7px;display:flex;align-items:center;gap:6px;}
+
+.aw{margin-bottom:16px;}
+.awh{font-size:.67rem;font-weight:800;color:var(--t3);letter-spacing:2.5px;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.awh::after{content:'';flex:1;height:1px;background:var(--bd);}
+.alert{border-radius:12px;padding:13px 15px;border:1px solid;margin-bottom:8px;animation:pop .3s ease;}
+@keyframes pop{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+.ad{background:rgba(242,92,92,.08);border-color:rgba(242,92,92,.25);}
+.aw2{background:rgba(245,156,60,.08);border-color:rgba(245,156,60,.25);}
+.aok{background:rgba(14,207,158,.08);border-color:rgba(14,207,158,.25);}
+.aidl{background:rgba(255,255,255,.03);border-color:var(--bd);}
+.ah{display:flex;align-items:center;gap:9px;margin-bottom:5px;}
+.aico{width:23px;height:23px;min-width:23px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:900;}
+.ad .aico{background:rgba(242,92,92,.15);color:var(--r);}
+.aw2 .aico{background:rgba(245,156,60,.15);color:var(--o);}
+.aok .aico{background:rgba(14,207,158,.15);color:var(--g);}
+.aname{font-size:.84rem;font-weight:700;}
+.ad .aname{color:var(--r);}.aw2 .aname{color:var(--o);}.aok .aname{color:var(--g);}
+.abody{font-size:.78rem;color:var(--t2);line-height:1.65;}
+
+.aibox{background:rgba(167,139,250,.05);border:1px solid rgba(167,139,250,.2);border-radius:16px;padding:20px 22px;margin-bottom:16px;}
+.aibh{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap;}
+.aibadge{font-size:.61rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;background:rgba(167,139,250,.12);color:#a78bfa;border:1px solid rgba(167,139,250,.25);padding:4px 12px;border-radius:20px;}
+.aist{font-size:.7rem;color:var(--t3);margin-right:auto;display:flex;align-items:center;gap:5px;}
+.aiblink{width:6px;height:6px;border-radius:50%;background:#a78bfa;animation:ep 1.5s infinite;}
+.aitext{font-size:.87rem;line-height:1.9;color:var(--t2);}
+.aitext.idle{color:var(--t3);}
+
+.rulesbox{background:var(--w);border:1px solid var(--bd);border-radius:14px;padding:18px 20px;margin-bottom:16px;}
+.rbh{font-size:.67rem;font-weight:800;color:var(--t3);letter-spacing:2.5px;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px;cursor:pointer;}
+.rbh::after{content:'';flex:1;height:1px;background:var(--bd);}
+.rbtog{margin-right:auto;font-size:.68rem;}
+.rgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
+.ri{background:rgba(255,255,255,.03);border:1px solid var(--bd);border-radius:9px;padding:10px 12px;transition:all .2s;}
+.ri.fired{background:rgba(242,92,92,.08);border-color:rgba(242,92,92,.3);}
+.ritop{display:flex;align-items:center;gap:6px;margin-bottom:3px;}
+.riid{font-size:.61rem;font-weight:800;color:var(--t3);letter-spacing:1px;}
+.ri.fired .riid{color:var(--r);}
+.riname{font-size:.77rem;font-weight:700;color:var(--t);}
+.ri.fired .riname{color:var(--r);}
+.ricond{font-size:.67rem;color:var(--t3);}
+
+.histbox{background:var(--w);border:1px solid var(--bd);border-radius:14px;padding:18px 20px;margin-top:14px;}
+.hi{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--bd);}
+.hi:last-child{border-bottom:none;}
+.hiscore{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:.84rem;font-weight:900;}
+.hd{background:rgba(242,92,92,.12);color:var(--r);}.hw{background:rgba(245,156,60,.12);color:var(--o);}.hok{background:rgba(14,207,158,.12);color:var(--g);}
+.hiinfo{flex:1;}
+.hiid{font-size:.82rem;font-weight:700;color:#fff;}
+.hisub{font-size:.71rem;color:var(--t3);}
+.hitime{font-size:.67rem;color:var(--t4);}
+
+.spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(26,111,212,.2);border-top-color:var(--b);border-radius:50%;animation:sp .7s linear infinite;}
+@keyframes sp{to{transform:rotate(360deg);}}
+
+/* ══ DASHBOARD ══ */
+#v-dash{padding-top:64px;padding-bottom:48px;background:var(--bg);}
+.di{max-width:1140px;margin:0 auto;padding:30px 24px;}
+.dtop{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:26px;flex-wrap:wrap;gap:14px;}
+.dtop h2{font-size:1.6rem;font-weight:900;color:#fff;letter-spacing:-.02em;}
+.dtop p{font-size:.82rem;color:var(--t3);margin-top:4px;}
+.livebadge{display:flex;align-items:center;gap:6px;background:var(--w);border:1px solid var(--bd);border-radius:20px;padding:6px 14px;font-size:.73rem;font-weight:700;color:var(--r);box-shadow:var(--sh);}
+.lbd{width:7px;height:7px;border-radius:50%;background:var(--r);animation:ep 1.2s infinite;}
+.krow{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;}
+.kpi{background:var(--w);border:1px solid var(--bd);border-radius:14px;padding:20px 18px;box-shadow:var(--sh);}
+.kv{font-size:2rem;font-weight:900;letter-spacing:-.03em;margin-bottom:4px;}
+.kv.g{background:linear-gradient(135deg,var(--g),var(--b));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.kv.r{color:var(--r);}.kv.o{color:var(--o);}.kv.b{color:var(--b);}
+.kl{font-size:.8rem;font-weight:700;color:#fff;}
+.ks{font-size:.71rem;color:var(--t3);margin-top:2px;}
+.ktr{font-size:.7rem;margin-top:6px;font-weight:600;}
+.tu{color:var(--r);}.td{color:var(--g);}
+.dgrid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+.dcard{background:var(--w);border:1px solid var(--bd);border-radius:16px;padding:22px;box-shadow:var(--sh);}
+.dch{font-size:.69rem;font-weight:800;color:var(--t3);letter-spacing:2px;text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.dch::after{content:'';flex:1;height:1px;background:var(--bd);}
+.barchart{display:flex;flex-direction:column;gap:11px;}
+.bcrow{display:flex;align-items:center;gap:10px;}
+.bclbl{font-size:.75rem;color:var(--t2);min-width:95px;text-align:right;}
+.bct{flex:1;height:9px;background:rgba(255,255,255,.05);border-radius:5px;overflow:hidden;}
+.bcf{height:100%;border-radius:5px;transition:width 1.2s cubic-bezier(.4,0,.2,1);}
+.bcn{font-size:.73rem;font-weight:700;color:var(--t);min-width:28px;}
+.rgrid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.rgi{background:rgba(255,255,255,.03);border:1px solid var(--bd);border-radius:10px;padding:11px 14px;}
+.rgitop{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;}
+.rgin{font-size:.8rem;font-weight:700;color:#fff;}
+.rginum{font-size:.77rem;font-weight:800;color:var(--r);}
+.rgibar{height:5px;background:rgba(255,255,255,.05);border-radius:3px;overflow:hidden;}
+.rgifill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--gm),var(--g));}
+.rtable{width:100%;border-collapse:collapse;}
+.rtable th{font-size:.67rem;font-weight:700;color:var(--t3);letter-spacing:1.5px;text-transform:uppercase;padding:0 10px 12px;text-align:right;border-bottom:1px solid var(--bd);}
+.rtable td{padding:12px 10px;font-size:.8rem;color:var(--t);border-bottom:1px solid var(--bd);vertical-align:middle;}
+.rtable tr:last-child td{border-bottom:none;}
+.rtable tr:hover td{background:rgba(255,255,255,.03);}
+.sb{font-size:.71rem;font-weight:700;padding:3px 10px;border-radius:6px;}
+.sbd{background:rgba(242,92,92,.12);color:var(--r);}.sbw{background:rgba(245,156,60,.12);color:var(--o);}.sbok{background:rgba(14,207,158,.12);color:var(--g);}
+
+/* ══ CSV BATCH ══ */
+#v-csv{padding-top:64px;padding-bottom:64px;background:var(--bg);}
+.csv-inner{max-width:1140px;margin:0 auto;padding:32px 24px;}
+.csv-header{margin-bottom:28px;}
+.csv-header h2{font-size:1.6rem;font-weight:900;color:#fff;letter-spacing:-.02em;margin-bottom:6px;}
+.csv-header p{font-size:.85rem;color:var(--t3);}
+
+/* Upload zone */
+.upload-zone{background:var(--w);border:2px dashed rgba(14,207,158,.25);border-radius:20px;padding:48px 32px;text-align:center;cursor:pointer;transition:all .3s;position:relative;margin-bottom:24px;}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--g);background:rgba(14,207,158,.04);box-shadow:0 0 32px rgba(14,207,158,.1);}
+.upload-zone.drag{transform:scale(1.01);}
+.uz-icon{font-size:2.8rem;margin-bottom:14px;display:block;}
+.uz-title{font-size:1.1rem;font-weight:800;color:#fff;margin-bottom:8px;}
+.uz-sub{font-size:.82rem;color:var(--t3);margin-bottom:18px;}
+.uz-btn{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--g),var(--g2));color:#fff;border:none;padding:11px 26px;border-radius:10px;font-family:'Tajawal',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;box-shadow:0 3px 12px rgba(14,207,158,.25);transition:all .2s;}
+.uz-btn:hover{transform:translateY(-1px);box-shadow:0 5px 16px rgba(14,207,158,.35);}
+.uz-accept{font-size:.68rem;color:var(--t4);margin-top:12px;}
+#csvInput{display:none;}
+
+/* CSV Format helper */
+.format-box{background:var(--s1);border:1px solid var(--bd);border-radius:14px;padding:18px 20px;margin-bottom:24px;}
+.format-box-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.format-box-title{font-size:.7rem;font-weight:800;color:var(--t3);letter-spacing:2px;text-transform:uppercase;}
+.format-toggle{background:none;border:1px solid var(--bd);color:var(--t3);font-family:'Tajawal',sans-serif;font-size:.72rem;padding:4px 12px;border-radius:6px;cursor:pointer;transition:all .18s;}
+.format-toggle:hover{border-color:var(--g);color:var(--g);}
+.format-body{overflow:hidden;transition:all .3s;}
+.format-cols{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;}
+.fcol{background:rgba(255,255,255,.03);border:1px solid var(--bd);border-radius:8px;padding:8px 12px;}
+.fcol-name{font-size:.72rem;font-weight:800;color:var(--g);font-family:monospace;margin-bottom:3px;}
+.fcol-desc{font-size:.68rem;color:var(--t3);}
+.csv-sample{background:rgba(0,0,0,.3);border:1px solid var(--bd);border-radius:8px;padding:12px 16px;font-family:monospace;font-size:.72rem;color:var(--t2);line-height:1.9;overflow-x:auto;white-space:pre;}
+.dl-sample{display:inline-flex;align-items:center;gap:6px;background:rgba(79,159,248,.08);border:1px solid rgba(79,159,248,.2);color:var(--b);font-family:'Tajawal',sans-serif;font-size:.75rem;font-weight:700;padding:7px 16px;border-radius:8px;cursor:pointer;transition:all .18s;margin-top:10px;border:none;}
+.dl-sample:hover{background:rgba(79,159,248,.15);}
+
+/* Progress bar */
+.csv-progress{background:var(--w);border:1px solid var(--bd);border-radius:14px;padding:20px 22px;margin-bottom:20px;display:none;}
+.csv-progress.on{display:block;}
+.cp-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.cp-label{font-size:.8rem;font-weight:700;color:var(--t);}
+.cp-pct{font-size:.8rem;font-weight:800;color:var(--g);}
+.cp-bar{height:8px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden;}
+.cp-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--g2),var(--g));transition:width .4s ease;width:0%;}
+.cp-stats{display:flex;gap:16px;margin-top:10px;flex-wrap:wrap;}
+.cpstat{font-size:.71rem;color:var(--t3);}
+.cpstat strong{color:var(--t);}
+
+/* Batch KPIs */
+.batch-kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px;display:none;}
+.batch-kpis.on{display:grid;}
+.bkpi{background:var(--w);border:1px solid var(--bd);border-radius:12px;padding:16px 14px;text-align:center;}
+.bkpi-num{font-size:1.7rem;font-weight:900;letter-spacing:-.03em;margin-bottom:3px;}
+.bkpi-lbl{font-size:.7rem;color:var(--t3);font-weight:600;}
+.bkpi-sub{font-size:.65rem;color:var(--t4);margin-top:2px;}
+
+/* Batch charts */
+.batch-charts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px;display:none;}
+.batch-charts.on{display:grid;}
+.bcc{background:var(--w);border:1px solid var(--bd);border-radius:14px;padding:18px;}
+.bcc-title{font-size:.65rem;font-weight:800;color:var(--t3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:14px;}
+.bcc-wrap{position:relative;height:180px;}
+
+/* Results table */
+.batch-results{background:var(--w);border:1px solid var(--bd);border-radius:16px;overflow:hidden;display:none;}
+.batch-results.on{display:block;}
+.br-head{padding:18px 20px 14px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+.br-title{font-size:.7rem;font-weight:800;color:var(--t3);letter-spacing:2px;text-transform:uppercase;}
+.br-filters{display:flex;gap:6px;flex-wrap:wrap;}
+.brf{background:rgba(255,255,255,.04);border:1px solid var(--bd);color:var(--t3);font-family:'Tajawal',sans-serif;font-size:.71rem;font-weight:600;padding:5px 12px;border-radius:6px;cursor:pointer;transition:all .18s;}
+.brf:hover{background:rgba(255,255,255,.08);color:var(--t);}
+.brf.on{background:rgba(14,207,158,.12);border-color:rgba(14,207,158,.3);color:var(--g);}
+.brf.f-danger.on{background:rgba(242,92,92,.12);border-color:rgba(242,92,92,.3);color:var(--r);}
+.brf.f-warn.on{background:rgba(245,156,60,.12);border-color:rgba(245,156,60,.3);color:var(--o);}
+.br-actions{display:flex;gap:8px;}
+.bra{background:rgba(255,255,255,.05);border:1px solid var(--bd);color:var(--t2);font-family:'Tajawal',sans-serif;font-size:.74rem;font-weight:600;padding:7px 14px;border-radius:8px;cursor:pointer;transition:all .18s;display:flex;align-items:center;gap:6px;}
+.bra:hover{background:rgba(255,255,255,.1);border-color:rgba(14,207,158,.3);color:var(--g);}
+.br-table-wrap{overflow-x:auto;max-height:520px;overflow-y:auto;}
+.br-table{width:100%;border-collapse:collapse;min-width:900px;}
+.br-table th{font-size:.63rem;font-weight:700;color:var(--t3);letter-spacing:1.5px;text-transform:uppercase;padding:11px 12px;text-align:right;border-bottom:1px solid var(--bd);background:rgba(255,255,255,.02);position:sticky;top:0;}
+.br-table td{padding:12px 12px;font-size:.8rem;color:var(--t);border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle;}
+.br-table tr:last-child td{border-bottom:none;}
+.br-table tr:hover td{background:rgba(255,255,255,.025);}
+.score-pill{font-size:.72rem;font-weight:800;padding:4px 10px;border-radius:6px;display:inline-block;}
+.sp-danger{background:rgba(242,92,92,.12);color:var(--r);}
+.sp-warn{background:rgba(245,156,60,.12);color:var(--o);}
+.sp-safe{background:rgba(14,207,158,.12);color:var(--g);}
+.risk-badge{font-size:.68rem;font-weight:700;padding:4px 10px;border-radius:20px;display:inline-block;}
+.rb-danger{background:rgba(242,92,92,.1);color:var(--r);border:1px solid rgba(242,92,92,.2);}
+.rb-warn{background:rgba(245,156,60,.1);color:var(--o);border:1px solid rgba(245,156,60,.2);}
+.rb-safe{background:rgba(14,207,158,.1);color:var(--g);border:1px solid rgba(14,207,158,.2);}
+.cont-badges{display:flex;flex-wrap:wrap;gap:4px;max-width:260px;}
+.cb{font-size:.62rem;padding:2px 7px;border-radius:4px;background:rgba(242,92,92,.08);color:rgba(242,92,92,.85);border:1px solid rgba(242,92,92,.15);}
+.cb-warn{background:rgba(245,156,60,.08);color:rgba(245,156,60,.85);border:1px solid rgba(245,156,60,.15);}
+.no-data{padding:40px;text-align:center;color:var(--t3);font-size:.88rem;}
+
+/* empty state */
+.csv-empty{text-align:center;padding:64px 32px;display:block;}
+.csv-empty.hidden{display:none;}
+.ce-icon{font-size:3rem;margin-bottom:16px;display:block;opacity:.4;}
+.ce-title{font-size:1rem;font-weight:700;color:var(--t2);margin-bottom:8px;}
+.ce-desc{font-size:.82rem;color:var(--t3);}
+
+/* Sort arrows */
+.sort-btn{background:none;border:none;color:var(--t4);cursor:pointer;font-size:.65rem;padding:0 2px;transition:color .18s;}
+.sort-btn:hover,.sort-btn.active{color:var(--g);}
+
+/* responsive */
+@media(max-width:900px){
+  nav{padding:0 20px;}.ntabs{display:none;}
+  .hero-inner{grid-template-columns:1fr;}.hero{padding:60px 24px 48px;}
+  .app-wrap{grid-template-columns:1fr;}
+  .sidebar{max-height:none;position:static;border-left:none;border-bottom:1px solid var(--bd);}
+  .rp{max-height:none;}
+  .prob-grid,.cases-grid,.layers-grid,.charts-grid,.dgrid{grid-template-columns:1fr;}
+  .impact-grid,.krow{grid-template-columns:1fr 1fr;}
+  .arch-flow{flex-direction:column;}
+  .sec{padding:52px 24px;}.strip{padding:20px 24px;}
+  .batch-kpis{grid-template-columns:repeat(3,1fr);}
+  .batch-charts{grid-template-columns:1fr;}
+  .format-cols{grid-template-columns:1fr 1fr;}
+}
+@media(max-width:580px){
+  .krow,.impact-grid,.strip-inner{grid-template-columns:1fr 1fr;}
+  .rgrid{grid-template-columns:1fr;}
+  footer{flex-direction:column;gap:8px;text-align:center;}
+  .batch-kpis{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nlogo" onclick="show('home')">
+    <div class="nmark">⚖️</div>
+    <div><div class="ntext">ميزان</div><div class="nsub">AI Data Guardian · حساب المواطن</div></div>
+  </div>
+  <div class="ntabs">
+    <button class="ntab on" id="t-home" onclick="show('home')">الرئيسية</button>
+    <button class="ntab" id="t-app" onclick="show('app')">التدقيق الذكي</button>
+    <button class="ntab" id="t-csv" onclick="show('csv')">📂 تحليل CSV</button>
+    <button class="ntab" id="t-dash" onclick="show('dash')">لوحة التحكم</button>
+  </div>
+  <button class="ncta" onclick="show('csv')">📂 رفع CSV</button>
+</nav>
+
+<!-- ══════ HOME ══════ -->
+<div id="v-home" class="view on">
+  <section class="hero">
+    <div class="hero-mesh"></div>
+    <div class="hero-inner">
+      <div>
+        <div class="heyebrow"><div class="ep"></div>الحارس الذكي لنزاهة بيانات حساب المواطن</div>
+        <h1>بيانات الأمس<br><em>تحمي عدالة اليوم</em></h1>
+        <p class="hero-desc">منظومة ذكاء اصطناعي تكتشف <strong>التناقضات الدلالية</strong> في مسوح دخل وإنفاق الأسرة لحظياً — لضمان وصول دعم حساب المواطن لمستحقيه الفعليين.</p>
+        <div class="hbtns">
+          <button class="btn-p" onclick="show('app')">⚡ جرب التدقيق الذكي</button>
+          <button class="btn-p" onclick="show('csv')" style="background:linear-gradient(135deg,var(--b),#2563eb);">📂 تحليل ملف CSV</button>
+          <button class="btn-s" onclick="show('dash')">📊 لوحة التحكم</button>
+        </div>
+      </div>
+      <div class="live-box">
+        <div class="lb-head">
+          <div class="live-chip"><div class="live-chip-dot"></div>مباشر</div>
+          <div class="lb-title">وفورات مُقدَّرة من دقة الاستهداف</div>
+        </div>
+        <div class="lb-main">
+          <div class="lb-num" id="lcNum">٠</div>
+          <div class="lb-lbl">ريال سعودي — وفورات سنوية مُحتملة</div>
+        </div>
+        <div class="lb-div"></div>
+        <div class="lb-stats">
+          <div class="lb-stat"><div class="lb-snum" id="lcCases">٠</div><div class="lb-slbl">استبيان مُحلَّل</div></div>
+          <div class="lb-stat"><div class="lb-snum" id="lcFlags">٠</div><div class="lb-slbl">حالة مُكتشَفة</div></div>
+        </div>
+        <div class="lb-note">⚠️ أرقام تقديرية توضيحية — بيانات محاكاة</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="strip">
+    <div class="strip-inner">
+      <div class="ss"><div class="ssn">٣</div><div class="ssl">طبقات ذكاء متكاملة</div></div>
+      <div class="ss"><div class="ssn">١٠+</div><div class="ssl">قاعدة منطقية فعّالة</div></div>
+      <div class="ss"><div class="ssn">+٧٠٪</div><div class="ssl">تقليص وقت التدقيق</div></div>
+      <div class="ss"><div class="ssn">CSV</div><div class="ssl">تحليل دُفعي بملف واحد</div></div>
+    </div>
+  </div>
+
+  <section class="sec prob-sec">
+    <div class="si">
+      <div class="prob-grid">
+        <div>
+          <div class="kk ko">المشكلة المستهدفة</div>
+          <h2 class="st">تناقضات خفية تُهدر<br>مليارات الريالات</h2>
+          <div class="prob-text">
+            <p>يعتمد برنامج حساب المواطن على بيانات مسوح دخل وإنفاق الأسرة لتحديد الأهلية، غير أن هذه البيانات تعاني من <strong>تناقضات دلالية خفية</strong> لا يكشفها التدقيق الحقلي التقليدي الذي يفحص كل متغير منفرداً.</p>
+            <p>أسرة قد تُفصح عن دخل منخفض بينما تكشف أصولها وأنماط إنفاقها وضعاً مغايراً تماماً. تراكم هذه الفجوات يُفضي إلى <strong>توجيه الدعم لغير مستحقيه</strong> وحرمان مستحقين فعليين.</p>
+            <p>في غياب أي منظومة ذكية تتعلم من هذه الأخطاء — <strong>هنا يأتي دور ميزان</strong>.</p>
+          </div>
+        </div>
+        <div class="prob-cards">
+          <div class="pcard"><div class="pci pr">🔴</div><div><div class="pch4">تدقيق منعزل لكل متغير</div><div class="pcp">لا توجد رؤية شاملة للعلاقات بين الدخل والإنفاق والأصول معاً</div></div></div>
+          <div class="pcard"><div class="pci po">📋</div><div><div class="pch4">لا توجد ذاكرة للأخطاء التاريخية</div><div class="pcp">أنماط التناقض المتكررة لا تُحوَّل إلى قواعد وقائية مستقبلية</div></div></div>
+          <div class="pcard"><div class="pci pb">💡</div><div><div class="pch4">الباحث الميداني بلا دعم ذكي</div><div class="pcp">إشارة خطأ مجردة دون تفسير سياقي أو توجيه للتحقق الصحيح</div></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec cases-sec">
+    <div class="si">
+      <div class="sh c">
+        <div class="kk ko">أمثلة حقيقية من الميدان</div>
+        <h2 class="st">كيف يكتشف ميزان التناقضات؟</h2>
+        <p class="sd">سيناريوهات واقعية تُظهر كيف تنكشف الفجوات بين المُصرَّح به والواقع الفعلي</p>
+      </div>
+      <div class="cases-grid">
+        <div class="ccase">
+          <div class="cc-head"><div class="cc-id">الحالة الأولى · أولوية تحقيق</div><div class="cc-title">دخل منخفض مع أصول عالية</div></div>
+          <div class="cc-body">
+            <div class="cc-row"><div class="crl">الدخل الشهري المُصرَّح</div><div class="crv red">٣٬٨٠٠ ريال</div></div>
+            <div class="cc-row"><div class="crl">الإيجار الشهري</div><div class="crv red">٤٬٢٠٠ ريال ❌</div></div>
+            <div class="cc-row"><div class="crl">السيارات المسجلة</div><div class="crv orange">٣ سيارات ⚠️</div></div>
+            <div class="cc-row"><div class="crl">السفر الخارجي</div><div class="crv orange">٤ مرات/سنة ⚠️</div></div>
+          </div>
+          <div class="cc-foot">
+            <div class="cc-verdict vd">🔴 درجة التناقض: <span class="vbadge vbd">٨٨ / ١٠٠</span></div>
+            <div class="csbar csd" style="width:88%;margin-top:8px;"></div>
+          </div>
+        </div>
+        <div class="ccase">
+          <div class="cc-head"><div class="cc-id">الحالة الثانية · يحتاج مراجعة</div><div class="cc-title">إيجار مرتفع بشكل غير معتاد</div></div>
+          <div class="cc-body">
+            <div class="cc-row"><div class="crl">الدخل الشهري المُصرَّح</div><div class="crv">٧٬٠٠٠ ريال</div></div>
+            <div class="cc-row"><div class="crl">الإيجار الشهري</div><div class="crv orange">٥٬٢٠٠ ريال (٧٤٪) ⚠️</div></div>
+            <div class="cc-row"><div class="crl">اشتراكات ترفيهية</div><div class="crv orange">+٥ اشتراكات ⚠️</div></div>
+            <div class="cc-row"><div class="crl">السفر الخارجي</div><div class="crv green">لا يوجد ✓</div></div>
+          </div>
+          <div class="cc-foot">
+            <div class="cc-verdict vw">🟠 درجة التناقض: <span class="vbadge vbw">٣٦ / ١٠٠</span></div>
+            <div class="csbar csw" style="width:36%;margin-top:8px;"></div>
+          </div>
+        </div>
+        <div class="ccase">
+          <div class="cc-head"><div class="cc-id">الحالة الثالثة · سليم</div><div class="cc-title">بيانات متسقة ومنطقية</div></div>
+          <div class="cc-body">
+            <div class="cc-row"><div class="crl">الدخل الشهري المُصرَّح</div><div class="crv green">٨٬٥٠٠ ريال ✓</div></div>
+            <div class="cc-row"><div class="crl">الإيجار الشهري</div><div class="crv green">٢٬٨٠٠ ريال (٣٣٪) ✓</div></div>
+            <div class="cc-row"><div class="crl">السيارات المسجلة</div><div class="crv green">سيارة واحدة ✓</div></div>
+            <div class="cc-row"><div class="crl">السفر الخارجي</div><div class="crv green">مرة/سنة ✓</div></div>
+          </div>
+          <div class="cc-foot">
+            <div class="cc-verdict vok">✅ درجة التناقض: <span class="vbadge vbok">٠ / ١٠٠</span></div>
+            <div class="csbar csok" style="width:2%;margin-top:8px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="si">
+      <div class="sh c">
+        <div class="kk kg">المنهجية التقنية</div>
+        <h2 class="st">ثلاث طبقات، منظومة واحدة</h2>
+        <p class="sd">بنية تقنية بسيطة وقوية تجمع دقة القواعد المنطقية مع ذكاء النماذج اللغوية الكبيرة</p>
+      </div>
+      <div class="layers-grid">
+        <div class="layer l1"><div class="ln">الطبقة الأولى</div><span class="li">⚙️</span><div class="lname">محرك القواعد الذكية</div><p class="ldesc">قواعد IF-THEN مبنية على خبرة الهيئة العامة للإحصاء والأنماط التاريخية. كل قاعدة تحمل وزناً بحسب خطورة التناقض وتُطبَّق لحظياً على كل استبيان عند إدخاله.</p><span class="ltech">Rule-Based Engine</span></div>
+        <div class="layer l2"><div class="ln">الطبقة الثانية</div><span class="li">📊</span><div class="lname">خوارزمية التصنيف</div><p class="ldesc">يُحسب لكل استبيان مجموع نقاط التناقض ليُصنَّف في ثلاث فئات: سليم، يحتاج مراجعة، أو أولوية تحقيق — مما يساعد الباحث الميداني على تحديد الأولويات بدقة.</p><span class="ltech">Scoring Algorithm</span></div>
+        <div class="layer l3"><div class="ln">الطبقة الثالثة</div><span class="li">🧠</span><div class="lname">المفسر الذكي Claude AI</div><p class="ldesc">استدعاء Claude AI يُولّد خلال ثوانٍ تقريراً سياقياً بالعربية يشرح التناقض ويقترح أسبابه ويُرشد الباحث لخطوات التحقق المناسبة — لا إشارة خطأ مجردة.</p><span class="ltech">LLM API — Arabic NLG</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec charts-sec">
+    <div class="si">
+      <div class="sh c">
+        <div class="kk kb">البيانات والمؤشرات</div>
+        <h2 class="st">نتائج بيانات المحاكاة</h2>
+        <p class="sd">مبنية على بيانات اصطناعية محاكية لمسوح الأسرة لاختبار كفاءة المنظومة والتحقق منها</p>
+      </div>
+      <div class="charts-grid">
+        <div class="cchart"><div class="ct">توزيع درجات التناقض (١٠٠٠ استبيان)</div><div class="cw"><canvas id="chartDist"></canvas></div></div>
+        <div class="cchart"><div class="ct">أكثر أنواع التناقضات تكراراً</div><div class="cw"><canvas id="chartTypes"></canvas></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="si">
+      <div class="sh c">
+        <div class="kk kg">القيمة المضافة</div>
+        <h2 class="st">أثر حقيقي على كل مستوى</h2>
+      </div>
+      <div class="impact-grid">
+        <div class="icard"><span class="icico">👤</span><div class="icnum">+٧٠٪</div><div class="iclbl">تسريع التدقيق</div><div class="icdesc">يتحول الباحث إلى متخذ قرار مدعوم بذكاء اصطناعي</div></div>
+        <div class="icard"><span class="icico">⚖️</span><div class="icnum">عدالة</div><div class="iclbl">الدعم لمستحقيه</div><div class="icdesc">ضمان وصول حساب المواطن لمن يستحقه فعلاً</div></div>
+        <div class="icard"><span class="icico">🏦</span><div class="icnum">وفورات</div><div class="iclbl">أثر مالي ضخم</div><div class="icdesc">رفع دقة الاستهداف يُولّد وفورات ضخمة</div></div>
+        <div class="icard"><span class="icico">📂</span><div class="icnum">CSV</div><div class="iclbl">تحليل دُفعي</div><div class="icdesc">رفع مئات السجلات وتحليلها بلحظات</div></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="cta-wrap">
+    <div class="ctabox">
+      <h2>جاهز لتجربة ميزان؟</h2>
+      <p>أدخل بيانات أسرة افتراضية أو ارفع ملف CSV بمئات السجلات وشاهد كيف يكتشف النظام التناقضات لحظياً</p>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+        <button class="btn-p" onclick="show('app')">⚡ التدقيق الفردي</button>
+        <button class="btn-p" onclick="show('csv')" style="background:linear-gradient(135deg,var(--b),#2563eb);">📂 تحليل ملف CSV</button>
+        <button class="btn-s" onclick="show('dash')">📊 لوحة التحكم</button>
+      </div>
+    </div>
+  </div>
+  <footer>
+    <span>⚖️ <strong>ميزان</strong> — هاكثون الهيئة العامة للإحصاء</span>
+    <span>بيانات الأمس تحمي عدالة اليوم</span>
+  </footer>
+</div>
+
+<!-- ══════ APP ══════ -->
+<div id="v-app" class="view">
+  <div class="app-wrap">
+    <div class="sidebar">
+      <div class="sbsec">
+        <div class="sblbl">سيناريوهات جاهزة</div>
+        <div class="presets">
+          <button class="preset" onclick="lp('danger')">🔴 خطورة عالية</button>
+          <button class="preset" onclick="lp('warn')">🟠 مراجعة</button>
+          <button class="preset" onclick="lp('ok')">✅ سليم</button>
+        </div>
+      </div>
+      <div class="sbsec">
+        <div class="sblbl">بيانات الأسرة</div>
+        <div class="frow">
+          <div class="fld"><label>الدخل الشهري (ريال)</label><input type="number" id="finc" placeholder="مثال: 6000" min="0"></div>
+          <div class="fld"><label>عدد أفراد الأسرة</label><select id="fmem"><option value="1">١</option><option value="2">٢</option><option value="3">٣</option><option value="4" selected>٤</option><option value="5">٥+</option></select></div>
+        </div>
+        <div class="fld"><label>وضع السكن</label><select id="fhous"><option value="own">تمليك</option><option value="rent">إيجار</option><option value="family">سكن أسري</option><option value="gov">سكن حكومي</option></select></div>
+        <div class="fld"><label>الإيجار الشهري (ريال)</label><input type="number" id="frent" placeholder="0" min="0"></div>
+      </div>
+      <div class="sbsec">
+        <div class="sblbl">الأصول وأنماط الإنفاق</div>
+        <div class="fld"><label>عدد السيارات المسجلة</label><select id="fcars"><option value="0">لا يوجد</option><option value="1">سيارة</option><option value="2">سيارتان</option><option value="3">٣ سيارات</option><option value="4">٤ أو أكثر</option></select></div>
+        <div class="frow">
+          <div class="fld"><label>اشتراكات ترفيهية</label><select id="fsubs"><option value="0">لا يوجد</option><option value="1">١–٢</option><option value="2">٣–٥</option><option value="3">+٥</option></select></div>
+          <div class="fld"><label>سفر خارجي/سنة</label><select id="ftrav"><option value="0">لا يوجد</option><option value="1">مرة</option><option value="2">مرتان</option><option value="3">٣ أو أكثر</option></select></div>
+        </div>
+        <div class="frow">
+          <div class="fld"><label>عقارات مملوكة</label><select id="fprop"><option value="0">لا يوجد</option><option value="1">عقار</option><option value="2">٢ أو أكثر</option></select></div>
+          <div class="fld"><label>الديون الشهرية (ريال)</label><input type="number" id="fdebt" placeholder="0" min="0"></div>
+        </div>
+        <div class="fld"><label>مصدر الدخل</label><select id="fsrc"><option value="salary">راتب</option><option value="business">تجاري</option><option value="freelance">حر</option><option value="none">بدون عمل</option><option value="pension">تقاعد</option></select></div>
+      </div>
+      <button class="mbtn" id="mbtn" onclick="doAnalyze()">⚡ تحليل بـ Claude AI</button>
+      <div class="ainote"><div class="aidot"></div>مدعوم بـ Claude AI — تقارير عربية سياقية</div>
+    </div>
+
+    <div class="rp">
+      <div class="rptop">
+        <div class="rptitle">نتائج التدقيق الذكي</div>
+        <div class="chip cidl" id="chip"><div class="cdot" style="background:var(--t3);"></div>في الانتظار</div>
+      </div>
+
+      <div class="score-hero">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:5px;">
+          <svg class="ring" viewBox="0 0 100 100">
+            <circle class="ring-bg" cx="50" cy="50" r="40"/>
+            <circle class="ring-fg" id="rfg" cx="50" cy="50" r="40" stroke="var(--bd2)"/>
+            <text id="rval" x="50" y="50" text-anchor="middle" dominant-baseline="central" font-size="18" font-weight="900" fill="var(--t)" font-family="Tajawal">—</text>
+          </svg>
+          <div class="rlbl">درجة التناقض</div>
+        </div>
+        <div class="sr">
+          <h3 id="stitle">أدخل البيانات للتحليل</h3>
+          <p id="sdesc">قم بتعبئة بيانات الأسرة ثم اضغط "تحليل بـ Claude AI"</p>
+          <div class="sbt"><div class="sbf" id="sbf" style="width:0%;background:var(--bd2);"></div></div>
+          <div class="ssub" id="ssub" style="color:var(--t3);"><div class="cdot" style="background:var(--t3);"></div>أدخل البيانات</div>
+        </div>
+      </div>
+
+      <div class="aw">
+        <div class="awh">التناقضات المكتشفة</div>
+        <div id="abox"><div class="alert aidl"><div class="abody" style="text-align:center;color:var(--t3);padding:8px 0;">اضغط تحليل لبدء الفحص ⚡</div></div></div>
+      </div>
+
+      <div class="aibox">
+        <div class="aibh">
+          <div class="aibadge">تقرير Claude AI — سياقي بالعربية</div>
+          <div class="aist" id="aist"><div class="aiblink"></div>جاهز للتحليل</div>
+        </div>
+        <div class="aitext idle" id="airep">في انتظار بيانات الاستبيان لإصدار التقرير...</div>
+      </div>
+
+      <div class="rulesbox">
+        <div class="rbh" onclick="toggleR()">القواعد المنطقية المُطبَّقة <span class="rbtog" id="rtog">▼</span></div>
+        <div id="rbody"><div class="rgrid" id="rgrid"></div></div>
+      </div>
+
+      <div class="histbox" id="hbox" style="display:none;">
+        <div class="rbh">سجل التحليلات السابقة</div>
+        <div id="hlist"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ CSV BATCH ══════ -->
+<div id="v-csv" class="view">
+  <div class="csv-inner">
+    <div class="csv-header">
+      <div class="kk kb" style="display:inline-flex;margin-bottom:10px;">تحليل دُفعي — CSV Batch</div>
+      <h2>تحليل ملفات CSV بالجملة</h2>
+      <p>ارفع ملف CSV يحتوي على سجلات أسرية متعددة وسيقوم ميزان بتحليل كل سجل تلقائياً وإنتاج تقرير شامل</p>
+    </div>
+
+    <!-- Format Helper -->
+    <div class="format-box">
+      <div class="format-box-head">
+        <div class="format-box-title">📋 صيغة الملف المطلوبة</div>
+        <div style="display:flex;gap:8px;">
+          <button class="format-toggle" onclick="toggleFormat()">إخفاء / إظهار</button>
+          <button class="dl-sample" onclick="downloadSample()">⬇ تحميل ملف نموذجي</button>
+        </div>
+      </div>
+      <div class="format-body" id="formatBody">
+        <div class="format-cols">
+          <div class="fcol"><div class="fcol-name">income</div><div class="fcol-desc">الدخل الشهري بالريال</div></div>
+          <div class="fcol"><div class="fcol-name">family_members</div><div class="fcol-desc">عدد أفراد الأسرة</div></div>
+          <div class="fcol"><div class="fcol-name">housing</div><div class="fcol-desc">own / rent / family / gov</div></div>
+          <div class="fcol"><div class="fcol-name">rent</div><div class="fcol-desc">الإيجار الشهري بالريال</div></div>
+          <div class="fcol"><div class="fcol-name">cars</div><div class="fcol-desc">عدد السيارات (0–4)</div></div>
+          <div class="fcol"><div class="fcol-name">subscriptions</div><div class="fcol-desc">الاشتراكات (0–3)</div></div>
+          <div class="fcol"><div class="fcol-name">travel</div><div class="fcol-desc">رحلات السفر (0–3)</div></div>
+          <div class="fcol"><div class="fcol-name">properties</div><div class="fcol-desc">العقارات المملوكة</div></div>
+          <div class="fcol"><div class="fcol-name">debt</div><div class="fcol-desc">الديون الشهرية بالريال</div></div>
+          <div class="fcol"><div class="fcol-name">income_source</div><div class="fcol-desc">salary/business/freelance/none/pension</div></div>
+          <div class="fcol"><div class="fcol-name">region</div><div class="fcol-desc">المنطقة الجغرافية</div></div>
+          <div class="fcol"><div class="fcol-name">case_id</div><div class="fcol-desc">رقم الحالة (اختياري)</div></div>
+        </div>
+        <div class="csv-sample">income,family_members,housing,rent,cars,subscriptions,travel,properties,debt,income_source,region,case_id
+3800,4,rent,4200,3,2,3,0,0,none,الرياض,2024-001
+7000,3,rent,5200,1,3,1,0,2000,salary,جدة,2024-002
+8500,4,rent,2800,1,1,1,0,500,salary,الدمام,2024-003
+12000,5,own,0,2,2,2,1,1500,business,مكة,2024-004
+4500,6,rent,4600,2,1,0,0,3000,none,المدينة,2024-005</div>
+      </div>
+    </div>
+
+    <!-- Upload Zone -->
+    <div class="upload-zone" id="uploadZone" onclick="document.getElementById('csvInput').click()" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+      <span class="uz-icon">📂</span>
+      <div class="uz-title">اسحب ملف CSV هنا أو انقر للاختيار</div>
+      <div class="uz-sub">يدعم PapaParse — تحليل فوري بالمتصفح بدون رفع للخادم</div>
+      <button class="uz-btn" onclick="event.stopPropagation();document.getElementById('csvInput').click()">📂 اختر ملف CSV</button>
+      <div class="uz-accept">يقبل: .csv — أقصى حجم موصى به: 10MB (حوالي ١٠٬٠٠٠ سجل)</div>
+    </div>
+    <input type="file" id="csvInput" accept=".csv,text/csv" onchange="handleCSVFile(event)">
+
+    <!-- Progress -->
+    <div class="csv-progress" id="csvProgress">
+      <div class="cp-top">
+        <div class="cp-label" id="cpLabel">جاري التحليل...</div>
+        <div class="cp-pct" id="cpPct">0%</div>
+      </div>
+      <div class="cp-bar"><div class="cp-fill" id="cpFill"></div></div>
+      <div class="cp-stats">
+        <span class="cpstat">مُعالَج: <strong id="cpDone">0</strong></span>
+        <span class="cpstat">إجمالي: <strong id="cpTotal">0</strong></span>
+        <span class="cpstat">خطورة: <strong id="cpDanger" style="color:var(--r)">0</strong></span>
+        <span class="cpstat">مراجعة: <strong id="cpWarn" style="color:var(--o)">0</strong></span>
+        <span class="cpstat">سليم: <strong id="cpSafe" style="color:var(--g)">0</strong></span>
+      </div>
+    </div>
+
+    <!-- Batch KPIs -->
+    <div class="batch-kpis" id="batchKpis">
+      <div class="bkpi"><div class="bkpi-num" id="bk-total" style="background:linear-gradient(135deg,var(--g),var(--b));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">0</div><div class="bkpi-lbl">إجمالي السجلات</div><div class="bkpi-sub" id="bk-file">—</div></div>
+      <div class="bkpi"><div class="bkpi-num" id="bk-danger" style="color:var(--r);">0</div><div class="bkpi-lbl">أولوية تحقيق</div><div class="bkpi-sub" id="bk-danger-pct">—</div></div>
+      <div class="bkpi"><div class="bkpi-num" id="bk-warn" style="color:var(--o);">0</div><div class="bkpi-lbl">يحتاج مراجعة</div><div class="bkpi-sub" id="bk-warn-pct">—</div></div>
+      <div class="bkpi"><div class="bkpi-num" id="bk-safe" style="color:var(--g);">0</div><div class="bkpi-lbl">سليم</div><div class="bkpi-sub" id="bk-safe-pct">—</div></div>
+      <div class="bkpi"><div class="bkpi-num" id="bk-avg" style="color:var(--b);">0</div><div class="bkpi-lbl">متوسط الدرجة</div><div class="bkpi-sub">من 100</div></div>
+    </div>
+
+    <!-- Batch Charts -->
+    <div class="batch-charts" id="batchCharts">
+      <div class="bcc"><div class="bcc-title">توزيع التصنيفات</div><div class="bcc-wrap"><canvas id="batchChartDist"></canvas></div></div>
+      <div class="bcc"><div class="bcc-title">أبرز أنواع التناقضات</div><div class="bcc-wrap"><canvas id="batchChartTypes"></canvas></div></div>
+      <div class="bcc"><div class="bcc-title">توزيع الدرجات</div><div class="bcc-wrap"><canvas id="batchChartScores"></canvas></div></div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="csv-empty" id="csvEmpty">
+      <span class="ce-icon">📊</span>
+      <div class="ce-title">لا توجد نتائج بعد</div>
+      <div class="ce-desc">ارفع ملف CSV لبدء التحليل الدُفعي أو حمّل الملف النموذجي لتجربة النظام</div>
+    </div>
+
+    <!-- Results Table -->
+    <div class="batch-results" id="batchResults">
+      <div class="br-head">
+        <div class="br-title">نتائج التحليل الدُفعي</div>
+        <div class="br-filters">
+          <button class="brf on" onclick="filterBatch('all',this)">الكل</button>
+          <button class="brf f-danger" onclick="filterBatch('danger',this)">🔴 أولوية تحقيق</button>
+          <button class="brf f-warn" onclick="filterBatch('warn',this)">🟠 يحتاج مراجعة</button>
+          <button class="brf" onclick="filterBatch('safe',this)">✅ سليم</button>
+        </div>
+        <div class="br-actions">
+          <button class="bra" onclick="exportCSVResults()">⬇ تصدير النتائج CSV</button>
+          <button class="bra" onclick="resetBatch()">🔄 إعادة تعيين</button>
+        </div>
+      </div>
+      <div class="br-table-wrap">
+        <table class="br-table" id="brTable">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>رقم الحالة</th>
+              <th>المنطقة</th>
+              <th>الدخل <button class="sort-btn" onclick="sortBatch('income')">⇅</button></th>
+              <th>الإيجار</th>
+              <th>السيارات</th>
+              <th>أفراد الأسرة</th>
+              <th>الدرجة <button class="sort-btn" onclick="sortBatch('score')">⇅</button></th>
+              <th>التصنيف</th>
+              <th>التناقضات</th>
+            </tr>
+          </thead>
+          <tbody id="brBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ DASHBOARD ══════ -->
+<div id="v-dash" class="view">
+  <div class="di">
+    <div class="dtop">
+      <div>
+        <div class="kk kg" style="display:inline-block;margin-bottom:8px;">لوحة التحكم التحليلية</div>
+        <h2>نظرة شاملة على مؤشرات الجودة</h2>
+        <p id="dashSource">بيانات تجريبية توضيحية — تُبنى من السجلات الفعلية عند التشغيل الكامل</p>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="livebadge"><div class="lbd"></div>بيانات مباشرة</div>
+        <button class="bra" id="dashCsvBtn" onclick="show('csv')" style="display:none;background:rgba(79,159,248,.08);border-color:rgba(79,159,248,.2);color:var(--b);">← العودة لنتائج CSV</button>
+      </div>
+    </div>
+    <div class="krow">
+      <div class="kpi"><div class="kv g" id="dk-total">١٬٢٤٨</div><div class="kl">استبيان مُحلَّل</div><div class="ks">هذا الشهر</div><div class="ktr tu" id="dk-total-sub">↑ ١٨٪ عن الشهر الماضي</div></div>
+      <div class="kpi"><div class="kv r" id="dk-danger">٨٧</div><div class="kl">أولوية تحقيق</div><div class="ks" id="dk-danger-pct">٦.٩٪ من الإجمالي</div><div class="ktr td">↓ ٣٪ تحسن</div></div>
+      <div class="kpi"><div class="kv o" id="dk-warn">٢١٤</div><div class="kl">تحتاج مراجعة</div><div class="ks" id="dk-warn-pct">١٧.١٪ من الإجمالي</div><div class="ktr td">↓ ٥٪ تحسن</div></div>
+      <div class="kpi"><div class="kv b" id="dk-safe">٩٤٧</div><div class="kl">استبيان سليم</div><div class="ks" id="dk-safe-pct">٧٥.٩٪ من الإجمالي</div><div class="ktr tu">↑ ٨٪ نمو</div></div>
+    </div>
+    <div class="dgrid">
+      <div class="dcard">
+        <div class="dch">أكثر أنواع التناقضات تكراراً</div>
+        <div class="barchart" id="dashRuleChart">
+          <div class="bcrow"><div class="bclbl">دخل &lt; إيجار</div><div class="bct"><div class="bcf" style="width:82%;background:linear-gradient(90deg,rgba(242,92,92,.3),var(--r));"></div></div><div class="bcn">١٨٢</div></div>
+          <div class="bcrow"><div class="bclbl">سيارات متعددة</div><div class="bct"><div class="bcf" style="width:63%;background:linear-gradient(90deg,rgba(245,156,60,.3),var(--o));"></div></div><div class="bcn">١٤١</div></div>
+          <div class="bcrow"><div class="bclbl">سفر + دخل منخفض</div><div class="bct"><div class="bcf" style="width:44%;background:linear-gradient(90deg,rgba(79,159,248,.3),var(--b));"></div></div><div class="bcn">٩٨</div></div>
+          <div class="bcrow"><div class="bclbl">اشتراكات زائدة</div><div class="bct"><div class="bcf" style="width:33%;background:linear-gradient(90deg,var(--gm),var(--g));"></div></div><div class="bcn">٧٣</div></div>
+          <div class="bcrow"><div class="bclbl">ديون &gt; ٥٠٪ دخل</div><div class="bct"><div class="bcf" style="width:22%;background:linear-gradient(90deg,#e9d5ff,#7c3aed);"></div></div><div class="bcn">٤٨</div></div>
+        </div>
+      </div>
+      <div class="dcard">
+        <div class="dch" id="dashRegionTitle">المناطق الجغرافية الأعلى خطورة</div>
+        <div class="rgrid2" id="dashRegionChart">
+          <div class="rgi"><div class="rgitop"><div class="rgin">الرياض</div><div class="rginum">٣٢</div></div><div class="rgibar"><div class="rgifill" style="width:80%;"></div></div></div>
+          <div class="rgi"><div class="rgitop"><div class="rgin">جدة</div><div class="rginum">٢٨</div></div><div class="rgibar"><div class="rgifill" style="width:70%;"></div></div></div>
+          <div class="rgi"><div class="rgitop"><div class="rgin">الدمام</div><div class="rginum">٢١</div></div><div class="rgibar"><div class="rgifill" style="width:52%;"></div></div></div>
+          <div class="rgi"><div class="rgitop"><div class="rgin">مكة</div><div class="rginum">١٥</div></div><div class="rgibar"><div class="rgifill" style="width:38%;"></div></div></div>
+          <div class="rgi"><div class="rgitop"><div class="rgin">المدينة</div><div class="rginum">١١</div></div><div class="rgibar"><div class="rgifill" style="width:28%;"></div></div></div>
+          <div class="rgi"><div class="rgitop"><div class="rgin">تبوك</div><div class="rginum">٨</div></div><div class="rgibar"><div class="rgifill" style="width:20%;"></div></div></div>
+        </div>
+      </div>
+      <div class="dcard" style="grid-column:1/-1;">
+        <div class="dch">آخر الحالات المُعالَجة</div>
+        <table class="rtable" id="dashTable">
+          <thead><tr><th>رقم الحالة</th><th>المنطقة</th><th>التناقضات</th><th>الدرجة</th><th>التصنيف</th><th>الوقت</th></tr></thead>
+          <tbody id="dashTableBody">
+            <tr><td>#٢٠٢٤-٨٨٧</td><td>الرياض</td><td>٣ تناقضات</td><td><span class="sb sbd">٧٨/١٠٠</span></td><td>أولوية تحقيق</td><td>منذ ٥ دقائق</td></tr>
+            <tr><td>#٢٠٢٤-٨٨٦</td><td>جدة</td><td>تناقضان</td><td><span class="sb sbw">٤٢/١٠٠</span></td><td>يحتاج مراجعة</td><td>منذ ١٢ دقيقة</td></tr>
+            <tr><td>#٢٠٢٤-٨٨٥</td><td>الدمام</td><td>—</td><td><span class="sb sbok">٠/١٠٠</span></td><td>سليم</td><td>منذ ١٨ دقيقة</td></tr>
+            <tr><td>#٢٠٢٤-٨٨٤</td><td>مكة</td><td>تناقض</td><td><span class="sb sbw">٢٨/١٠٠</span></td><td>يحتاج مراجعة</td><td>منذ ٢٥ دقيقة</td></tr>
+            <tr><td>#٢٠٢٤-٨٨٣</td><td>المدينة</td><td>٤ تناقضات</td><td><span class="sb sbd">٨٩/١٠٠</span></td><td>أولوية تحقيق</td><td>منذ ٣٣ دقيقة</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+// NAV
+// ══════════════════════════════════════════
+function show(id){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
+  document.getElementById('v-'+id).classList.add('on');
+  ['home','app','csv','dash'].forEach(n=>{const t=document.getElementById('t-'+n);if(t)t.classList.toggle('on',n===id);});
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(id==='home')initCharts();
+}
+
+// LIVE COUNTER
+function ac(el,end,dur){let s=0,step=end/80,tm=setInterval(()=>{s=Math.min(s+step,end);el.textContent=Math.round(s).toLocaleString('ar-SA');if(s>=end)clearInterval(tm);},dur/80);}
+setTimeout(()=>{ac(document.getElementById('lcNum'),4250000000,2200);ac(document.getElementById('lcCases'),1248,1800);ac(document.getElementById('lcFlags'),301,2000);},500);
+
+// ══════════════════════════════════════════
+// HOME CHARTS
+// ══════════════════════════════════════════
+let ci=false;
+function initCharts(){
+  if(ci)return;ci=true;
+  Chart.defaults.font={family:'Tajawal'};Chart.defaults.color='rgba(143,163,191,.85)';
+  new Chart(document.getElementById('chartDist'),{type:'doughnut',data:{labels:['سليم','يحتاج مراجعة','أولوية تحقيق'],datasets:[{data:[759,214,87],backgroundColor:['rgba(14,207,158,.2)','rgba(245,156,60,.2)','rgba(242,92,92,.2)'],borderColor:['#0ecf9e','#f59c3c','#f25c5c'],borderWidth:2,hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{position:'bottom',labels:{font:{family:'Tajawal'},padding:14,usePointStyle:true,color:'rgba(143,163,191,.85)'}},tooltip:{callbacks:{label:c=>' '+c.parsed+' استبيان'}}}}});
+  new Chart(document.getElementById('chartTypes'),{type:'bar',data:{labels:['دخل<إيجار','سيارات','سفر','اشتراكات','ديون'],datasets:[{data:[182,141,98,73,48],backgroundColor:['rgba(220,38,38,.12)','rgba(217,119,6,.12)','rgba(26,111,212,.12)','rgba(10,143,110,.12)','rgba(124,58,237,.12)'],borderColor:['#dc2626','#d97706','#1a6fd4','#0a8f6e','#7c3aed'],borderWidth:2,borderRadius:8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{grid:{color:'rgba(255,255,255,.05)'},ticks:{font:{family:'Tajawal'}}},x:{grid:{display:false},ticks:{font:{family:'Tajawal'}}}}}});
+}
+initCharts();
+
+// ══════════════════════════════════════════
+// RULES
+// ══════════════════════════════════════════
+let ropen=true;
+function toggleR(){ropen=!ropen;document.getElementById('rbody').style.display=ropen?'block':'none';document.getElementById('rtog').textContent=ropen?'▼':'▶';}
+const RULES=[
+  {id:'R1',n:'دخل < إيجار',c:'housing=إيجار & rent > income',w:40,f:d=>d.h==='rent'&&d.inc>0&&d.rent>d.inc},
+  {id:'R2',n:'نسبة إيجار > ٦٠٪',c:'rent/income > 60%',w:22,f:d=>d.h==='rent'&&d.inc>0&&d.rent>0&&d.rent<=d.inc&&d.rent/d.inc>0.6},
+  {id:'R3',n:'٣+ سيارات + دخل < ٨٠٠٠',c:'cars ≥ 3 & income < 8000',w:28,f:d=>d.cars>=3&&d.inc>0&&d.inc<8000},
+  {id:'R4',n:'٢ سيارات + دخل < ٥٠٠٠',c:'cars ≥ 2 & income < 5000',w:16,f:d=>d.cars>=2&&d.inc>0&&d.inc<5000&&!(d.cars>=3&&d.inc<8000)},
+  {id:'R5',n:'+٥ اشتراكات + دخل منخفض',c:'subs > 5 & income < 6000',w:14,f:d=>d.subs===3&&d.inc>0&&d.inc<6000},
+  {id:'R6',n:'٣+ رحلات + دخل < ١٠٠٠٠',c:'travel ≥ 3 & income < 10000',w:20,f:d=>d.trav===3&&d.inc>0&&d.inc<10000},
+  {id:'R7',n:'إيجار غير مُدخل',c:'housing=إيجار & rent=0',w:10,f:d=>d.h==='rent'&&d.rent===0},
+  {id:'R8',n:'ديون > ٥٠٪ دخل',c:'debt > income × 50%',w:24,f:d=>d.debt>0&&d.inc>0&&d.debt>d.inc*0.5},
+  {id:'R9',n:'عقارات + بدون عمل',c:'property ≥ 2 & source=none',w:30,f:d=>d.prop>=2&&d.src==='none'},
+  {id:'R10',n:'أسرة كبيرة + دخل < ٢٠٠٠',c:'members ≥ 4 & income < 2000',w:18,f:d=>d.mem>=4&&d.inc>0&&d.inc<2000},
+];
+function bRules(fired){document.getElementById('rgrid').innerHTML=RULES.map(r=>`<div class="ri ${fired.includes(r.id)?'fired':''}"><div class="ritop"><span class="riid">${r.id}</span>${fired.includes(r.id)?'🔴':''}</div><div class="riname">${r.n}</div><div class="ricond">${r.c} · وزن ${r.w}</div></div>`).join('');}
+bRules([]);
+
+// ══════════════════════════════════════════
+// PRESETS
+// ══════════════════════════════════════════
+function lp(t){
+  const P={danger:{inc:3800,rent:4200,h:'rent',cars:3,subs:2,trav:3,prop:0,debt:0,src:'salary',mem:4},warn:{inc:7000,rent:5200,h:'rent',cars:1,subs:3,trav:1,prop:0,debt:2000,src:'salary',mem:3},ok:{inc:8500,rent:2800,h:'rent',cars:1,subs:1,trav:1,prop:0,debt:500,src:'salary',mem:4}};
+  const p=P[t];
+  document.getElementById('finc').value=p.inc;document.getElementById('frent').value=p.rent;
+  document.getElementById('fhous').value=p.h;document.getElementById('fcars').value=String(p.cars);
+  document.getElementById('fsubs').value=String(p.subs);document.getElementById('ftrav').value=String(p.trav);
+  document.getElementById('fprop').value=String(p.prop);document.getElementById('fdebt').value=p.debt;
+  document.getElementById('fsrc').value=p.src;document.getElementById('fmem').value=String(p.mem);
+}
+
+// ══════════════════════════════════════════
+// HISTORY
+// ══════════════════════════════════════════
+let hist=[];
+function addH(s,c){
+  const id='#'+Date.now().toString().slice(-4);hist.unshift({id,s,c});if(hist.length>6)hist.pop();
+  document.getElementById('hbox').style.display='block';
+  document.getElementById('hlist').innerHTML=hist.map(h=>`<div class="hi"><div class="hiscore ${h.s>=55?'hd':h.s>=20?'hw':'hok'}">${h.s}</div><div class="hiinfo"><div class="hiid">استبيان ${h.id}</div><div class="hisub">${h.c===0?'لا تناقضات':h.c+' تناقض'}</div></div><div class="hitime">الآن</div></div>`).join('');
+}
+
+// ══════════════════════════════════════════
+// CORE: ANALYZE ONE RECORD
+// ══════════════════════════════════════════
+function analyzeRecord(d){
+  let score=0,fired=[],alerts=[];
+  RULES.forEach(r=>{if(r.f(d)){score+=r.w;fired.push(r.id);}});
+  score=Math.min(score,100);
+  const fmt=n=>n.toLocaleString('ar-SA')+' ريال';
+  if(d.h==='rent'&&d.inc>0&&d.rent>d.inc)alerts.push({t:'danger',n:'الدخل لا يغطي الإيجار',b:`الدخل (${fmt(d.inc)}) < الإيجار (${fmt(d.rent)}) — تناقض منطقي مباشر`});
+  if(d.h==='rent'&&d.inc>0&&d.rent>0&&d.rent<=d.inc&&d.rent/d.inc>0.6)alerts.push({t:'warn',n:'نسبة إيجار مرتفعة',b:`الإيجار ${Math.round(d.rent/d.inc*100)}٪ من الدخل — غير معتاد`});
+  if(d.cars>=3&&d.inc>0&&d.inc<8000)alerts.push({t:'danger',n:`${d.cars} سيارات مع دخل منخفض`,b:`${d.cars} سيارات مع دخل ${fmt(d.inc)} — راجع سجلات وزارة النقل`});
+  else if(d.cars>=2&&d.inc>0&&d.inc<5000)alerts.push({t:'warn',n:'سيارات لا تتناسب مع الدخل',b:`${d.cars} سيارات مع دخل ${fmt(d.inc)}`});
+  if(d.subs===3&&d.inc>0&&d.inc<6000)alerts.push({t:'warn',n:'اشتراكات ترفيهية زائدة',b:'أكثر من ٥ اشتراكات مع دخل منخفض'});
+  if(d.trav===3&&d.inc>0&&d.inc<10000)alerts.push({t:'warn',n:'سفر خارجي متكرر',b:`٣ رحلات+ مع دخل ${fmt(d.inc)}`});
+  if(d.h==='rent'&&d.rent===0)alerts.push({t:'warn',n:'إيجار غير مُدخل',b:'وضع السكن إيجار لكن القيمة غائبة'});
+  if(d.debt>0&&d.inc>0&&d.debt>d.inc*0.5)alerts.push({t:'danger',n:'ديون تتجاوز ٥٠٪ من الدخل',b:`ديون ${fmt(d.debt)} مقابل دخل ${fmt(d.inc)}`});
+  if(d.prop>=2&&d.src==='none')alerts.push({t:'danger',n:'عقارات مع غياب مصدر الدخل',b:'عقاران+ مع الإفصاح عن بدون عمل'});
+  if(d.mem>=4&&d.inc>0&&d.inc<2000)alerts.push({t:'warn',n:'دخل متدنٍ لأسرة كبيرة',b:`أسرة ${d.mem} أفراد بدخل ${fmt(d.inc)}`});
+  let risk,riskAr;
+  if(score>=55){risk='danger';riskAr='أولوية تحقيق';}
+  else if(score>=20){risk='warn';riskAr='يحتاج مراجعة';}
+  else{risk='safe';riskAr='سليم';}
+  return{score,fired,alerts,risk,riskAr};
+}
+
+// ══════════════════════════════════════════
+// SINGLE-RECORD ANALYZE (APP TAB)
+// ══════════════════════════════════════════
+async function doAnalyze(){
+  const btn=document.getElementById('mbtn');
+  btn.disabled=true;btn.innerHTML='<div class="spin"></div> جاري التحليل...';
+  const d={
+    inc:+document.getElementById('finc').value||0,rent:+document.getElementById('frent').value||0,
+    cars:+document.getElementById('fcars').value||0,subs:+document.getElementById('fsubs').value||0,
+    trav:+document.getElementById('ftrav').value||0,h:document.getElementById('fhous').value,
+    mem:+document.getElementById('fmem').value||4,src:document.getElementById('fsrc').value,
+    prop:+document.getElementById('fprop').value||0,debt:+document.getElementById('fdebt').value||0,
+  };
+  const{score,fired,alerts}=analyzeRecord(d);
+  updScore(score,alerts.length);renderAlerts(alerts);bRules(fired);addH(score,alerts.length);
+  setAI('load',null);
+  const rep=await getAI(d,alerts,score);
+  setAI('done',rep);
+  btn.disabled=false;btn.innerHTML='⚡ تحليل بـ Claude AI';
+}
+
+function updScore(s,cnt){
+  const circ=251.2,rfg=document.getElementById('rfg');
+  rfg.style.strokeDashoffset=circ-(s/100)*circ;
+  let col,title,desc,chipCls,chipTxt;
+  if(s===0&&cnt===0){col='var(--g)';title='البيانات سليمة تماماً ✅';desc='لا توجد تناقضات — الاستبيان جاهز للتسجيل.';chipCls='cok';chipTxt='سليم';}
+  else if(s<20){col='var(--g)';title='البيانات سليمة';desc='تناقضات طفيفة لا تستدعي إجراءً.';chipCls='cok';chipTxt='سليم';}
+  else if(s<55){col='var(--o)';title='يحتاج مراجعة ⚠️';desc=`${cnt} تناقض — راجع مع الأسرة قبل الإغلاق.`;chipCls='cwn';chipTxt='يحتاج مراجعة';}
+  else{col='var(--r)';title='خطورة عالية 🔴 — أولوية تحقيق';desc=`${cnt} تناقضات خطيرة — يُحال للمشرف فوراً.`;chipCls='cdng';chipTxt='خطورة عالية';}
+  rfg.style.stroke=col;
+  document.getElementById('rval').textContent=s;document.getElementById('rval').setAttribute('fill',col);
+  document.getElementById('stitle').textContent=title;
+  document.getElementById('sdesc').textContent=desc;document.getElementById('sdesc').style.color=col;
+  document.getElementById('sbf').style.width=s+'%';document.getElementById('sbf').style.background=col;
+  document.getElementById('ssub').innerHTML=`<div class="cdot" style="background:${col};"></div>${s<20?'الاستبيان متسق':s<55?'راجع مع الأسرة':'أحل للمشرف الميداني'}`;
+  document.getElementById('ssub').style.color=col;
+  const chip=document.getElementById('chip');
+  chip.className='chip '+chipCls;chip.innerHTML=`<div class="cdot" style="background:${col};"></div>${chipTxt}`;
+}
+
+function renderAlerts(alerts){
+  const b=document.getElementById('abox');
+  if(!alerts.length){b.innerHTML=`<div class="alert aok"><div class="ah"><div class="aico">✓</div><div class="aname">لا توجد تناقضات</div></div><div class="abody">البيانات متسقة منطقياً — الاستبيان جاهز للتسجيل</div></div>`;return;}
+  b.innerHTML=alerts.map(a=>`<div class="alert ${a.t==='danger'?'ad':'aw2'}"><div class="ah"><div class="aico">${a.t==='danger'?'✕':'⚠'}</div><div class="aname">${a.n}</div></div><div class="abody">${a.b}</div></div>`).join('');
+}
+
+function setAI(st,txt){
+  const el=document.getElementById('airep'),s=document.getElementById('aist');
+  if(st==='load'){el.className='aitext idle';el.innerHTML='<div class="spin" style="display:inline-block;margin-left:6px;"></div> Claude AI يُحلّل البيانات...';s.innerHTML='<div class="aiblink"></div>يعمل...';}
+  else{el.className='aitext';s.innerHTML='<div class="aiblink" style="background:var(--g);"></div>اكتمل';el.textContent='';let i=0;function t(){if(i<txt.length){el.textContent+=txt[i++];setTimeout(t,15);}}t();}
+}
+
+async function getAI(d,alerts,score){
+  const hm={own:'تمليك',rent:'إيجار',family:'سكن أسري',gov:'سكن حكومي'},sm={salary:'راتب',business:'تجاري',freelance:'حر',none:'بدون عمل',pension:'تقاعد'};
+  const sl=['لا يوجد','١–٢','٣–٥','+٥'],tl=['لا يوجد','مرة','مرتان','٣ أو أكثر'];
+  const prompt=`أنت محلل بيانات متخصص في مسوح دخل وإنفاق الأسرة لبرنامج حساب المواطن.
+بيانات: دخل ${d.inc} ريال | سكن ${hm[d.h]} | إيجار ${d.rent} | سيارات ${d.cars} | اشتراكات ${sl[d.subs]} | سفر ${tl[d.trav]} | مصدر ${sm[d.src]} | عقارات ${d.prop} | ديون ${d.debt} | أفراد ${d.mem}
+التناقضات (${alerts.length}): ${alerts.length===0?'لا يوجد':alerts.map((a,i)=>`${i+1}. ${a.n}`).join(' | ')}
+درجة: ${score}/100
+اكتب تقريراً مهنياً مختصراً (١٢٠–١٥٠ كلمة) للباحث الميداني: تقييم الاتساق، شرح التناقضات وأسبابها، خطوات التحقق، والتوصية النهائية. بدون رموز أو تنسيق.`;
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+    const j=await r.json();
+    if(j.content?.[0]?.text)return j.content[0].text.trim();
+  }catch(e){}
+  return alerts.length===0?'بعد مراجعة جميع متغيرات الاستبيان لا تظهر تعارضات دلالية. البيانات متسقة مع الأنماط المرجعية. التوصية: تسجيل الاستبيان والمتابعة الاعتيادية.':`تُظهر البيانات تعارضاً دلالياً بين الدخل المُصرَّح به وأنماط الإنفاق والأصول. رُصد ${alerts.length} تناقض. يُوصى بمراجعة السجلات الرسمية والتحقق من مصادر الدخل الإضافية. ${score>=55?'التوصية: إحالة عاجلة للمشرف الميداني.':'التوصية: مراجعة تفصيلية مع الأسرة قبل إغلاق الاستبيان.'}`;
+}
+
+// ══════════════════════════════════════════
+// CSV FORMAT TOGGLE
+// ══════════════════════════════════════════
+let fmtOpen=true;
+function toggleFormat(){
+  fmtOpen=!fmtOpen;
+  document.getElementById('formatBody').style.display=fmtOpen?'block':'none';
+}
+
+// ══════════════════════════════════════════
+// SAMPLE CSV DOWNLOAD
+// ══════════════════════════════════════════
+function downloadSample(){
+  const rows=[
+    'income,family_members,housing,rent,cars,subscriptions,travel,properties,debt,income_source,region,case_id',
+    '3800,4,rent,4200,3,2,3,0,0,none,الرياض,2024-001',
+    '7000,3,rent,5200,1,3,1,0,2000,salary,جدة,2024-002',
+    '8500,4,rent,2800,1,1,1,0,500,salary,الدمام,2024-003',
+    '12000,5,own,0,2,2,2,1,1500,business,مكة,2024-004',
+    '4500,6,rent,4600,2,1,0,0,3000,none,المدينة,2024-005',
+    '6000,3,rent,3200,1,2,1,0,800,salary,تبوك,2024-006',
+    '2500,5,rent,2600,1,0,0,0,0,none,حائل,2024-007',
+    '15000,4,own,0,3,3,3,2,0,business,الرياض,2024-008',
+    '9000,3,gov,0,2,1,2,0,1200,salary,جدة,2024-009',
+    '5500,4,rent,2000,0,2,0,0,600,pension,أبها,2024-010',
+    '3200,7,rent,3500,2,1,0,0,0,none,نجران,2024-011',
+    '11000,4,own,0,4,3,3,3,0,none,الرياض,2024-012',
+    '7500,2,rent,4800,2,3,2,0,1000,freelance,جدة,2024-013',
+    '18000,5,own,0,2,2,1,1,2000,salary,الدمام,2024-014',
+    '1800,4,rent,1900,1,0,0,0,0,none,القصيم,2024-015',
+    '8200,3,rent,3100,1,1,1,0,700,salary,مكة,2024-016',
+    '4000,5,family,0,3,2,2,0,0,none,المدينة,2024-017',
+    '13500,4,own,0,3,3,3,2,500,business,الرياض,2024-018',
+    '6800,3,rent,2900,1,2,1,0,900,salary,الطائف,2024-019',
+  ];
+  const blob=new Blob([rows.join('\n')],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='meezan_sample.csv';a.click();
+}
+
+// ══════════════════════════════════════════
+// DRAG & DROP
+// ══════════════════════════════════════════
+function handleDragOver(e){e.preventDefault();document.getElementById('uploadZone').classList.add('drag');}
+function handleDragLeave(){document.getElementById('uploadZone').classList.remove('drag');}
+function handleDrop(e){
+  e.preventDefault();
+  document.getElementById('uploadZone').classList.remove('drag');
+  const file=e.dataTransfer.files[0];
+  if(file&&(file.name.endsWith('.csv')||file.type==='text/csv'))processCSVFile(file);
+  else alert('الرجاء رفع ملف بصيغة .csv');
+}
+function handleCSVFile(e){const file=e.target.files[0];if(file)processCSVFile(file);}
+
+// ══════════════════════════════════════════
+// CSV PROCESSING (PapaParse)
+// ══════════════════════════════════════════
+let batchData=[];
+let batchFiltered=[];
+let batchSortCol='score';
+let batchSortDir=-1;
+let batchChartInstances={};
+
+function processCSVFile(file){
+  document.getElementById('csvEmpty').classList.add('hidden');
+  const prog=document.getElementById('csvProgress');
+  prog.classList.add('on');
+  document.getElementById('cpLabel').textContent=`تحليل: ${file.name}`;
+  document.getElementById('cpTotal').textContent='...';
+  document.getElementById('cpDone').textContent='0';
+  document.getElementById('cpDanger').textContent='0';
+  document.getElementById('cpWarn').textContent='0';
+  document.getElementById('cpSafe').textContent='0';
+  document.getElementById('cpFill').style.width='0%';
+  document.getElementById('cpPct').textContent='0%';
+  document.getElementById('batchKpis').classList.remove('on');
+  document.getElementById('batchCharts').classList.remove('on');
+  document.getElementById('batchResults').classList.remove('on');
+
+  Papa.parse(file,{
+    header:true,
+    skipEmptyLines:true,
+    dynamicTyping:true,
+    complete:function(results){
+      const rows=results.data;
+      document.getElementById('cpTotal').textContent=rows.length;
+      processBatchRows(rows,file.name);
+    },
+    error:function(err){
+      alert('خطأ في قراءة الملف: '+err.message);
+      prog.classList.remove('on');
+      document.getElementById('csvEmpty').classList.remove('hidden');
+    }
+  });
+}
+
+function mapRow(row){
+  // Map CSV columns to internal format — tolerant of different casing/aliases
+  const get=(keys,def=0)=>{
+    for(const k of keys){
+      const v=row[k]??row[k.toLowerCase()]??row[k.toUpperCase()];
+      if(v!==undefined&&v!==null&&v!=='')return typeof v==='number'?v:parseFloat(v)||def;
+    }
+    return def;
+  };
+  const getStr=(keys,def='')=>{
+    for(const k of keys){
+      const v=row[k]??row[k.toLowerCase()];
+      if(v!==undefined&&v!==null&&String(v).trim()!=='')return String(v).trim();
+    }
+    return def;
+  };
+  // subscriptions: stored as 0-3 level; CSV may contain raw level or count
+  let subs=get(['subscriptions','subs','subscription'],0);
+  if(subs>3)subs=3; // clamp
+  let trav=get(['travel','trips'],0);
+  if(trav>3)trav=3;
+  return{
+    inc:get(['income','دخل'],0),
+    rent:get(['rent','إيجار'],0),
+    cars:get(['cars','سيارات'],0),
+    subs:Math.round(subs),
+    trav:Math.round(trav),
+    h:getStr(['housing','سكن'],'own'),
+    mem:get(['family_members','members','أفراد'],4),
+    src:getStr(['income_source','source','مصدر'],'salary'),
+    prop:get(['properties','عقارات'],0),
+    debt:get(['debt','ديون'],0),
+    region:getStr(['region','منطقة'],'—'),
+    case_id:getStr(['case_id','id','رقم'],'—'),
+  };
+}
+
+async function processBatchRows(rows,fileName){
+  batchData=[];
+  let danger=0,warn=0,safe=0;
+  const total=rows.length;
+  // Process in chunks to avoid UI freeze
+  const CHUNK=50;
+  for(let i=0;i<total;i+=CHUNK){
+    const chunk=rows.slice(i,Math.min(i+CHUNK,total));
+    for(const row of chunk){
+      const d=mapRow(row);
+      const res=analyzeRecord(d);
+      batchData.push({...d,...res,rowNum:batchData.length+1,raw:row});
+      if(res.risk==='danger')danger++;
+      else if(res.risk==='warn')warn++;
+      else safe++;
+    }
+    // Update progress
+    const done=Math.min(i+CHUNK,total);
+    const pct=Math.round(done/total*100);
+    document.getElementById('cpFill').style.width=pct+'%';
+    document.getElementById('cpPct').textContent=pct+'%';
+    document.getElementById('cpDone').textContent=done;
+    document.getElementById('cpDanger').textContent=danger;
+    document.getElementById('cpWarn').textContent=warn;
+    document.getElementById('cpSafe').textContent=safe;
+    // Yield to browser
+    await new Promise(r=>setTimeout(r,0));
+  }
+  // Done
+  setTimeout(()=>{
+    document.getElementById('csvProgress').classList.remove('on');
+    renderBatchResults(fileName,danger,warn,safe);
+  },400);
+}
+
+function renderBatchResults(fileName,danger,warn,safe){
+  const total=batchData.length;
+  const avg=total?Math.round(batchData.reduce((s,r)=>s+r.score,0)/total):0;
+
+  // KPIs
+  const kpis=document.getElementById('batchKpis');
+  kpis.classList.add('on');
+  document.getElementById('bk-total').textContent=total.toLocaleString('ar-SA');
+  document.getElementById('bk-file').textContent=fileName;
+  document.getElementById('bk-danger').textContent=danger;
+  document.getElementById('bk-danger-pct').textContent=total?Math.round(danger/total*100)+'٪ من الإجمالي':'—';
+  document.getElementById('bk-warn').textContent=warn;
+  document.getElementById('bk-warn-pct').textContent=total?Math.round(warn/total*100)+'٪ من الإجمالي':'—';
+  document.getElementById('bk-safe').textContent=safe;
+  document.getElementById('bk-safe-pct').textContent=total?Math.round(safe/total*100)+'٪ من الإجمالي':'—';
+  document.getElementById('bk-avg').textContent=avg;
+
+  // Charts
+  renderBatchCharts(danger,warn,safe);
+
+  // Table
+  batchFiltered=[...batchData];
+  batchSortCol='score';batchSortDir=-1;
+  batchFiltered.sort((a,b)=>b.score-a.score);
+  renderBatchTable();
+  document.getElementById('batchResults').classList.add('on');
+
+  // Update dashboard with CSV data
+  updateDashboardFromCSV(fileName,total,danger,warn,safe,avg);
+}
+
+function renderBatchCharts(danger,warn,safe){
+  const charts=document.getElementById('batchCharts');
+  charts.classList.add('on');
+  Chart.defaults.font={family:'Tajawal'};Chart.defaults.color='rgba(143,163,191,.85)';
+
+  // Destroy old charts
+  ['batchChartDist','batchChartTypes','batchChartScores'].forEach(id=>{
+    if(batchChartInstances[id]){batchChartInstances[id].destroy();delete batchChartInstances[id];}
+  });
+
+  // Distribution doughnut
+  batchChartInstances['batchChartDist']=new Chart(document.getElementById('batchChartDist'),{
+    type:'doughnut',
+    data:{
+      labels:['سليم','يحتاج مراجعة','أولوية تحقيق'],
+      datasets:[{data:[safe,warn,danger],backgroundColor:['rgba(14,207,158,.2)','rgba(245,156,60,.2)','rgba(242,92,92,.2)'],borderColor:['#0ecf9e','#f59c3c','#f25c5c'],borderWidth:2,hoverOffset:8}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{position:'bottom',labels:{font:{family:'Tajawal'},padding:10,usePointStyle:true}},tooltip:{callbacks:{label:c=>' '+c.parsed+' سجل'}}}}
+  });
+
+  // Rule frequency bar
+  const ruleCounts={};
+  RULES.forEach(r=>ruleCounts[r.id]=0);
+  batchData.forEach(rec=>rec.fired.forEach(id=>{if(ruleCounts[id]!==undefined)ruleCounts[id]++;}));
+  const topRules=RULES.map(r=>({n:r.n,c:ruleCounts[r.id]})).sort((a,b)=>b.c-a.c).slice(0,5);
+  batchChartInstances['batchChartTypes']=new Chart(document.getElementById('batchChartTypes'),{
+    type:'bar',
+    data:{
+      labels:topRules.map(r=>r.n.length>8?r.n.slice(0,8)+'..':r.n),
+      datasets:[{data:topRules.map(r=>r.c),backgroundColor:['rgba(220,38,38,.15)','rgba(217,119,6,.15)','rgba(26,111,212,.15)','rgba(10,143,110,.15)','rgba(124,58,237,.15)'],borderColor:['#dc2626','#d97706','#1a6fd4','#0a8f6e','#7c3aed'],borderWidth:2,borderRadius:6}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{grid:{color:'rgba(255,255,255,.05)'},ticks:{font:{family:'Tajawal'}}},x:{grid:{display:false},ticks:{font:{family:'Tajawal',size:10}}}}}
+  });
+
+  // Score distribution histogram
+  const bins=[0,0,0,0,0]; // 0-19, 20-39, 40-54, 55-74, 75-100
+  batchData.forEach(r=>{
+    if(r.score<20)bins[0]++;
+    else if(r.score<40)bins[1]++;
+    else if(r.score<55)bins[2]++;
+    else if(r.score<75)bins[3]++;
+    else bins[4]++;
+  });
+  batchChartInstances['batchChartScores']=new Chart(document.getElementById('batchChartScores'),{
+    type:'bar',
+    data:{
+      labels:['0–19','20–39','40–54','55–74','75–100'],
+      datasets:[{data:bins,backgroundColor:['rgba(14,207,158,.2)','rgba(14,207,158,.15)','rgba(245,156,60,.15)','rgba(242,92,92,.15)','rgba(242,92,92,.25)'],borderColor:['#0ecf9e','#0ecf9e','#f59c3c','#f25c5c','#f25c5c'],borderWidth:2,borderRadius:6}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+c.parsed+' سجل'}}},scales:{y:{grid:{color:'rgba(255,255,255,.05)'},ticks:{font:{family:'Tajawal'}}},x:{grid:{display:false},ticks:{font:{family:'Tajawal'}}}}}
+  });
+}
+
+function renderBatchTable(){
+  const tbody=document.getElementById('brBody');
+  if(!batchFiltered.length){
+    tbody.innerHTML=`<tr><td colspan="10" class="no-data">لا توجد سجلات تطابق الفلتر المحدد</td></tr>`;
+    return;
+  }
+  tbody.innerHTML=batchFiltered.map((r,i)=>{
+    const scoreClass=r.risk==='danger'?'sp-danger':r.risk==='warn'?'sp-warn':'sp-safe';
+    const riskClass=r.risk==='danger'?'rb-danger':r.risk==='warn'?'rb-warn':'rb-safe';
+    const contBadges=r.alerts.length?r.alerts.map(a=>`<span class="cb ${a.t==='warn'?'cb-warn':''}">${a.n.length>12?a.n.slice(0,12)+'..':a.n}</span>`).join(''):'<span style="color:var(--g);font-size:.7rem;">✓ لا تناقضات</span>';
+    return`<tr>
+      <td style="color:var(--t4);font-size:.72rem;">${i+1}</td>
+      <td style="font-family:monospace;font-size:.76rem;color:var(--t2);">${r.case_id||'—'}</td>
+      <td>${r.region||'—'}</td>
+      <td>${r.inc.toLocaleString('ar-SA')} ر</td>
+      <td>${r.h==='rent'?r.rent.toLocaleString('ar-SA')+' ر':'—'}</td>
+      <td>${r.cars}</td>
+      <td>${r.mem}</td>
+      <td><span class="score-pill ${scoreClass}">${r.score}/100</span></td>
+      <td><span class="risk-badge ${riskClass}">${r.riskAr}</span></td>
+      <td><div class="cont-badges">${contBadges}</div></td>
+    </tr>`;
+  }).join('');
+}
+
+function filterBatch(type,btn){
+  document.querySelectorAll('.brf').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  if(type==='all')batchFiltered=[...batchData];
+  else batchFiltered=batchData.filter(r=>r.risk===type);
+  // Re-apply sort
+  const col=batchSortCol,dir=batchSortDir;
+  batchFiltered.sort((a,b)=>dir*(col==='score'?b.score-a.score:b[col]-a[col]));
+  renderBatchTable();
+}
+
+function sortBatch(col){
+  if(batchSortCol===col)batchSortDir*=-1;
+  else{batchSortCol=col;batchSortDir=-1;}
+  document.querySelectorAll('.sort-btn').forEach(b=>{b.classList.toggle('active',b.getAttribute('onclick').includes(col));});
+  batchFiltered.sort((a,b)=>{
+    if(col==='score')return batchSortDir*(b.score-a.score);
+    if(col==='income')return batchSortDir*(b.inc-a.inc);
+    return 0;
+  });
+  renderBatchTable();
+}
+
+function resetBatch(){
+  batchData=[];batchFiltered=[];
+  document.getElementById('batchKpis').classList.remove('on');
+  document.getElementById('batchCharts').classList.remove('on');
+  document.getElementById('batchResults').classList.remove('on');
+  document.getElementById('csvProgress').classList.remove('on');
+  document.getElementById('csvEmpty').classList.remove('hidden');
+  document.getElementById('csvInput').value='';
+  // Reset dashboard to default
+  resetDashboard();
+}
+
+// ══════════════════════════════════════════
+// EXPORT CSV RESULTS
+// ══════════════════════════════════════════
+function exportCSVResults(){
+  if(!batchData.length){alert('لا توجد نتائج للتصدير');return;}
+  const headers=['case_id','region','income','rent','housing','cars','family_members','subscriptions','travel','properties','debt','income_source','score','risk','risk_ar','contradictions_count','contradictions'];
+  const rows=batchData.map(r=>[
+    r.case_id||'',r.region||'',r.inc,r.rent,r.h,r.cars,r.mem,r.subs,r.trav,r.prop,r.debt,r.src,
+    r.score,r.risk,r.riskAr,r.alerts.length,
+    r.alerts.map(a=>a.n).join(' | ')
+  ].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(','));
+  const csv=[headers.join(','),...rows].join('\n');
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='meezan_results_'+Date.now()+'.csv';a.click();
+}
+
+// ══════════════════════════════════════════
+// DASHBOARD INTEGRATION
+// ══════════════════════════════════════════
+function updateDashboardFromCSV(fileName,total,danger,warn,safe,avg){
+  const toAr=n=>n.toString().replace(/\d/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]);
+  document.getElementById('dk-total').textContent=toAr(total);
+  document.getElementById('dk-danger').textContent=toAr(danger);
+  document.getElementById('dk-warn').textContent=toAr(warn);
+  document.getElementById('dk-safe').textContent=toAr(safe);
+  document.getElementById('dk-danger-pct').textContent=total?toAr(Math.round(danger/total*100))+'٪ من الإجمالي':'—';
+  document.getElementById('dk-warn-pct').textContent=total?toAr(Math.round(warn/total*100))+'٪ من الإجمالي':'—';
+  document.getElementById('dk-safe-pct').textContent=total?toAr(Math.round(safe/total*100))+'٪ من الإجمالي':'—';
+  document.getElementById('dk-total-sub').textContent='متوسط الدرجة: '+toAr(avg)+'/١٠٠';
+  document.getElementById('dashSource').textContent='البيانات من: '+fileName+' — '+toAr(total)+' سجل مُحلَّل';
+  document.getElementById('dashCsvBtn').style.display='flex';
+
+  // Rule frequency bars
+  const ruleCounts={};
+  RULES.forEach(r=>ruleCounts[r.id]=0);
+  batchData.forEach(rec=>rec.fired.forEach(id=>{if(ruleCounts[id]!==undefined)ruleCounts[id]++;}));
+  const topRules=RULES.map(r=>({n:r.n,c:ruleCounts[r.id]})).sort((a,b)=>b.c-a.c).slice(0,5);
+  const maxCount=Math.max(...topRules.map(r=>r.c),1);
+  const colors=['linear-gradient(90deg,rgba(242,92,92,.3),var(--r))','linear-gradient(90deg,rgba(245,156,60,.3),var(--o))','linear-gradient(90deg,rgba(79,159,248,.3),var(--b))','linear-gradient(90deg,var(--gm),var(--g))','linear-gradient(90deg,#e9d5ff,#7c3aed)'];
+  document.getElementById('dashRuleChart').innerHTML=topRules.map((r,i)=>`
+    <div class="bcrow">
+      <div class="bclbl" style="font-size:.72rem;">${r.n.length>10?r.n.slice(0,10)+'..':r.n}</div>
+      <div class="bct"><div class="bcf" style="width:${Math.round(r.c/maxCount*100)}%;background:${colors[i]};"></div></div>
+      <div class="bcn">${toAr(r.c)}</div>
+    </div>`).join('');
+
+  // Region chart
+  const regionCounts={};
+  batchData.filter(r=>r.risk==='danger').forEach(r=>{
+    const reg=r.region||'غير محدد';
+    regionCounts[reg]=(regionCounts[reg]||0)+1;
+  });
+  const topRegions=Object.entries(regionCounts).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const maxReg=Math.max(...topRegions.map(r=>r[1]),1);
+  if(topRegions.length){
+    document.getElementById('dashRegionTitle').textContent='المناطق الأعلى خطورة (من CSV)';
+    document.getElementById('dashRegionChart').innerHTML=topRegions.map(([reg,cnt])=>`
+      <div class="rgi">
+        <div class="rgitop"><div class="rgin">${reg}</div><div class="rginum">${toAr(cnt)}</div></div>
+        <div class="rgibar"><div class="rgifill" style="width:${Math.round(cnt/maxReg*100)}%;"></div></div>
+      </div>`).join('');
+  }
+
+  // Recent cases table
+  const recent=batchData.filter(r=>r.risk!=='safe').sort((a,b)=>b.score-a.score).slice(0,8);
+  document.getElementById('dashTableBody').innerHTML=recent.map(r=>{
+    const cls=r.risk==='danger'?'sbd':'sbw';
+    return`<tr>
+      <td>${r.case_id||'—'}</td>
+      <td>${r.region||'—'}</td>
+      <td>${r.alerts.length} تناقض</td>
+      <td><span class="sb ${cls}">${r.score}/١٠٠</span></td>
+      <td>${r.riskAr}</td>
+      <td>من ملف CSV</td>
+    </tr>`;
+  }).join('');
+  if(!recent.length)document.getElementById('dashTableBody').innerHTML='<tr><td colspan="6" class="no-data" style="padding:20px;text-align:center;color:var(--t3);">جميع السجلات سليمة ✅</td></tr>';
+}
+
+function resetDashboard(){
+  document.getElementById('dk-total').textContent='١٬٢٤٨';
+  document.getElementById('dk-danger').textContent='٨٧';
+  document.getElementById('dk-warn').textContent='٢١٤';
+  document.getElementById('dk-safe').textContent='٩٤٧';
+  document.getElementById('dk-danger-pct').textContent='٦.٩٪ من الإجمالي';
+  document.getElementById('dk-warn-pct').textContent='١٧.١٪ من الإجمالي';
+  document.getElementById('dk-safe-pct').textContent='٧٥.٩٪ من الإجمالي';
+  document.getElementById('dk-total-sub').textContent='↑ ١٨٪ عن الشهر الماضي';
+  document.getElementById('dashSource').textContent='بيانات تجريبية توضيحية — تُبنى من السجلات الفعلية عند التشغيل الكامل';
+  document.getElementById('dashCsvBtn').style.display='none';
+  document.getElementById('dashRuleChart').innerHTML=`
+    <div class="bcrow"><div class="bclbl">دخل &lt; إيجار</div><div class="bct"><div class="bcf" style="width:82%;background:linear-gradient(90deg,rgba(242,92,92,.3),var(--r));"></div></div><div class="bcn">١٨٢</div></div>
+    <div class="bcrow"><div class="bclbl">سيارات متعددة</div><div class="bct"><div class="bcf" style="width:63%;background:linear-gradient(90deg,rgba(245,156,60,.3),var(--o));"></div></div><div class="bcn">١٤١</div></div>
+    <div class="bcrow"><div class="bclbl">سفر + دخل منخفض</div><div class="bct"><div class="bcf" style="width:44%;background:linear-gradient(90deg,rgba(79,159,248,.3),var(--b));"></div></div><div class="bcn">٩٨</div></div>
+    <div class="bcrow"><div class="bclbl">اشتراكات زائدة</div><div class="bct"><div class="bcf" style="width:33%;background:linear-gradient(90deg,var(--gm),var(--g));"></div></div><div class="bcn">٧٣</div></div>
+    <div class="bcrow"><div class="bclbl">ديون &gt; ٥٠٪ دخل</div><div class="bct"><div class="bcf" style="width:22%;background:linear-gradient(90deg,#e9d5ff,#7c3aed);"></div></div><div class="bcn">٤٨</div></div>`;
+  document.getElementById('dashRegionTitle').textContent='المناطق الجغرافية الأعلى خطورة';
+  document.getElementById('dashRegionChart').innerHTML=`
+    <div class="rgi"><div class="rgitop"><div class="rgin">الرياض</div><div class="rginum">٣٢</div></div><div class="rgibar"><div class="rgifill" style="width:80%;"></div></div></div>
+    <div class="rgi"><div class="rgitop"><div class="rgin">جدة</div><div class="rginum">٢٨</div></div><div class="rgibar"><div class="rgifill" style="width:70%;"></div></div></div>
+    <div class="rgi"><div class="rgitop"><div class="rgin">الدمام</div><div class="rginum">٢١</div></div><div class="rgibar"><div class="rgifill" style="width:52%;"></div></div></div>
+    <div class="rgi"><div class="rgitop"><div class="rgin">مكة</div><div class="rginum">١٥</div></div><div class="rgibar"><div class="rgifill" style="width:38%;"></div></div></div>
+    <div class="rgi"><div class="rgitop"><div class="rgin">المدينة</div><div class="rginum">١١</div></div><div class="rgibar"><div class="rgifill" style="width:28%;"></div></div></div>
+    <div class="rgi"><div class="rgitop"><div class="rgin">تبوك</div><div class="rginum">٨</div></div><div class="rgibar"><div class="rgifill" style="width:20%;"></div></div></div>`;
+  document.getElementById('dashTableBody').innerHTML=`
+    <tr><td>#٢٠٢٤-٨٨٧</td><td>الرياض</td><td>٣ تناقضات</td><td><span class="sb sbd">٧٨/١٠٠</span></td><td>أولوية تحقيق</td><td>منذ ٥ دقائق</td></tr>
+    <tr><td>#٢٠٢٤-٨٨٦</td><td>جدة</td><td>تناقضان</td><td><span class="sb sbw">٤٢/١٠٠</span></td><td>يحتاج مراجعة</td><td>منذ ١٢ دقيقة</td></tr>
+    <tr><td>#٢٠٢٤-٨٨٥</td><td>الدمام</td><td>—</td><td><span class="sb sbok">٠/١٠٠</span></td><td>سليم</td><td>منذ ١٨ دقيقة</td></tr>
+    <tr><td>#٢٠٢٤-٨٨٤</td><td>مكة</td><td>تناقض</td><td><span class="sb sbw">٢٨/١٠٠</span></td><td>يحتاج مراجعة</td><td>منذ ٢٥ دقيقة</td></tr>
+    <tr><td>#٢٠٢٤-٨٨٣</td><td>المدينة</td><td>٤ تناقضات</td><td><span class="sb sbd">٨٩/١٠٠</span></td><td>أولوية تحقيق</td><td>منذ ٣٣ دقيقة</td></tr>`;
+}
+
+// ══════════════════════════════════════════
+// EXPORT PDF (SINGLE RECORD)
+// ══════════════════════════════════════════
+let _lastReport='',_lastData=null,_lastAlerts=[];
+function exportPDF(){
+  if(!_lastReport){alert('قم بتحليل استبيان أولاً ⚡');return;}
+  const d=_lastData,a=_lastAlerts;
+  const hn={own:'تمليك',rent:'إيجار',family:'أسري',gov:'حكومي'};
+  const w=window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
+<style>body{font-family:'Tajawal',sans-serif;direction:rtl;padding:36px;max-width:780px;margin:0 auto;color:#0f172a;font-size:14px;}
+h1{font-size:1.5rem;font-weight:900;margin-bottom:3px;}
+.sub{color:#64748b;font-size:.82rem;margin-bottom:24px;padding-bottom:12px;border-bottom:2px solid #e2e8f0;}
+.sec{margin-bottom:18px;padding:14px 16px;border:1px solid #e2e8f0;border-radius:8px;}
+.sec h3{font-size:.85rem;font-weight:800;color:#0d9488;margin-bottom:10px;text-transform:uppercase;letter-spacing:1px;}
+.row{display:flex;gap:8px;margin-bottom:5px;font-size:.84rem;}
+.lbl{color:#64748b;min-width:120px;}.val{font-weight:600;}
+.alert{padding:9px 13px;border-radius:6px;margin-bottom:6px;font-size:.82rem;}
+.ad{background:#fff5f5;border:1px solid #fecaca;color:#991b1b;}
+.aw{background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;}
+.air{background:#faf5ff;border:1px solid #e9d5ff;border-radius:7px;padding:14px;font-size:.85rem;line-height:1.85;color:#1e293b;}
+.foot{margin-top:28px;padding-top:12px;border-top:1px solid #e2e8f0;font-size:.75rem;color:#94a3b8;text-align:center;}
+@media print{body{padding:18px;}}</style>
+</head><body>
+<h1>⚖️ تقرير ميزان — التدقيق الذكي</h1>
+<div class="sub">تاريخ التقرير: ${new Date().toLocaleDateString('ar-SA')} &nbsp;|&nbsp; منظومة التدقيق الذكي لبيانات حساب المواطن</div>
+<div class="sec"><h3>بيانات الأسرة</h3>
+<div class="row"><span class="lbl">الدخل الشهري:</span><span class="val">${(d.income||0).toLocaleString('ar-SA')} ريال</span></div>
+<div class="row"><span class="lbl">وضع السكن:</span><span class="val">${hn[d.housing]||d.housing}</span></div>
+<div class="row"><span class="lbl">الإيجار الشهري:</span><span class="val">${(d.rent||0).toLocaleString('ar-SA')} ريال</span></div>
+<div class="row"><span class="lbl">عدد السيارات:</span><span class="val">${d.cars||0}</span></div>
+<div class="row"><span class="lbl">مصدر الدخل:</span><span class="val">${d.source||'—'}</span></div>
+</div>
+<div class="sec"><h3>نتيجة التدقيق</h3>
+<div class="row"><span class="lbl">درجة الخطورة:</span><span class="val">${document.getElementById('rval').textContent} / ١٠٠</span></div>
+<div class="row"><span class="lbl">التصنيف:</span><span class="val">${document.getElementById('stitle').textContent}</span></div>
+<div class="row"><span class="lbl">التناقضات:</span><span class="val">${a.length} تناقض مكتشف</span></div>
+</div>
+${a.length?`<div class="sec"><h3>التناقضات المكتشفة (${a.length})</h3>${a.map(al=>`<div class="alert ${al.t==='danger'?'ad':'aw'}"><strong>${al.n}:</strong> ${al.b||''}</div>`).join('')}</div>`:''}
+<div class="sec"><h3>تقرير Claude AI السياقي</h3><div class="air">${_lastReport}</div></div>
+<div class="foot">⚖️ ميزان — هاكثون الهيئة العامة للإحصاء ٢٠٢٤ · بيانات الأمس تحمي عدالة اليوم</div>
+<script>window.print();<\/script></body></html>`);
+  w.document.close();
+}
+</script>
+</body>
+</html>
